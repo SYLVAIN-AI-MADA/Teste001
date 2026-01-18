@@ -35,7 +35,6 @@
             width: 100%; max-width: 500px; height: 100vh; 
             background: var(--glass); backdrop-filter: blur(20px);
             display: flex; flex-direction: column; position: relative;
-            border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1);
         }
 
         header { 
@@ -44,7 +43,7 @@
         }
 
         #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 8px; }
-        .msg-wrapper { display: flex; flex-direction: column; max-width: 85%; }
+        .msg-wrapper { display: flex; flex-direction: column; max-width: 85%; position: relative; cursor: pointer; }
         .msg-wrapper.me { align-self: flex-end; align-items: flex-end; }
         .msg-wrapper.other { align-self: flex-start; align-items: flex-start; }
 
@@ -53,7 +52,7 @@
         .other .msg { background: var(--msg-other); color: var(--text); border-bottom-left-radius: 4px; }
 
         .seen-status { font-size: 0.65rem; opacity: 0.6; margin-top: 2px; }
-        #typingStatus { font-size: 0.75rem; padding: 0 20px; color: var(--accent); height: 20px; font-style: italic; }
+        #typingStatus { font-size: 0.75rem; padding: 5px 20px; color: var(--accent); height: 25px; font-style: italic; font-weight: 600; }
 
         .controls { padding: 15px; display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,0.1); }
         .controls input { 
@@ -65,7 +64,6 @@
         .active-screen { display: flex; }
 
         .item { padding: 15px 20px; display: flex; align-items: center; gap: 15px; cursor: pointer; border-bottom: 1px solid var(--glass); }
-        .item:hover { background: var(--glass); }
         .item img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); }
         .online-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--bg); margin-left: -25px; margin-top: 35px; z-index: 2; }
 
@@ -74,45 +72,33 @@
         .nav button.active { color: var(--accent); }
         .nav .icon { font-size: 1.5rem; display: block; }
 
-        #login { padding: 40px; text-align: center; justify-content: center; }
-        .avatar-choice { width: 60px; height: 60px; border-radius: 50%; margin: 5px; cursor: pointer; border: 3px solid transparent; }
-        .avatar-choice.selected { border-color: var(--accent); transform: scale(1.1); }
-        .btn { padding: 15px; border-radius: 25px; border: none; background: var(--accent); color: white; font-weight: 600; cursor: pointer; width: 100%; }
-
-        #callOverlay { position: absolute; inset: 0; background: #000; z-index: 500; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        #callOverlay { position: absolute; inset: 0; background: radial-gradient(circle, #302b63, #0f0c29); z-index: 500; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .call-btn { width: 60px; height: 60px; border-radius: 50%; border: none; color: white; cursor: pointer; font-size: 1.5rem; }
     </style>
 </head>
 <body>
 
 <div class="app">
     <div id="login" class="screen active-screen">
-        <h1 style="background:var(--rainbow); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2.5rem; margin:0;">LGBT+</h1>
-        <h3>Messenger Pro</h3>
-        <div id="avatarList" style="margin: 20px 0;">
-            <img class="avatar-choice selected" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" onclick="selectAv(this)">
-            <img class="avatar-choice" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Luna" onclick="selectAv(this)">
-            <img class="avatar-choice" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Akira" onclick="selectAv(this)">
+        <h1 style="background:var(--rainbow); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:3rem; text-align:center;">LGBT+</h1>
+        <div id="avatarList" style="text-align:center; margin: 20px 0;">
+            <img class="avatar-choice selected" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" onclick="selectAv(this)" style="width:70px; cursor:pointer; border-radius:50%; margin:5px;">
+            <img class="avatar-choice" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Luna" onclick="selectAv(this)" style="width:70px; cursor:pointer; border-radius:50%; margin:5px;">
         </div>
-        <input type="text" id="loginName" placeholder="Anaranao..." style="width:100%; padding:15px; border-radius:25px; margin-bottom:15px; border:none; background:var(--glass); color:var(--text);">
-        <button class="btn" onclick="doLogin()">MIDITRA</button>
+        <input type="text" id="loginName" placeholder="Anaranao..." style="width:85%; display:block; margin: 10px auto; padding:15px; border-radius:25px; border:none; background:var(--glass); color:var(--text);">
+        <button class="btn" onclick="doLogin()" style="width:85%; display:block; margin: 20px auto; padding:15px; border-radius:25px; background:var(--accent); color:white; border:none; font-weight:bold;">MIDITRA</button>
     </div>
 
     <div id="main" style="display:none; flex:1; flex-direction:column;">
         <div id="rooms" class="screen">
-            <header>
-                <span style="font-size:1.5rem; font-weight:600;">Chat</span>
-                <button onclick="toggleTheme()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">🌓</button>
-            </header>
+            <header><span style="font-size:1.5rem; font-weight:bold;">Messenger</span><button onclick="toggleTheme()" style="background:none; border:none; font-size:1.2rem;">🌓</button></header>
             <div id="userList"></div>
         </div>
 
         <div id="chat" class="screen">
             <header>
                 <button onclick="show('rooms')" style="background:none; border:none; color:var(--text); font-size:1.5rem;">←</button>
-                <div style="flex:1; margin-left:15px;">
-                    <b id="activeChatName">Anarana</b><br>
-                    <small id="activeStatus" style="opacity:0.6;">Online</small>
-                </div>
+                <div style="flex:1; margin-left:15px;"><b id="activeChatName">Anarana</b><br><small id="activeStatus" style="opacity:0.6;">Online</small></div>
                 <button onclick="makeCall()" style="background:none; border:none; font-size:1.3rem;">📞</button>
             </header>
             <div id="messages"></div>
@@ -120,8 +106,8 @@
             <div class="controls">
                 <button onclick="$('fileIn').click()" style="background:none; border:none; font-size:1.5rem;">🖼️</button>
                 <input type="text" id="msgInput" placeholder="Hafatra..." oninput="sendTyping()">
-                <button onclick="sendMsg()" style="background:none; border:none; color:var(--accent); font-size:1.5rem; font-weight:bold;">➤</button>
-                <input type="file" id="fileIn" style="display:none" onchange="uploadFile(this)">
+                <button onclick="sendMsg()" style="background:none; border:none; color:var(--accent); font-size:1.5rem;">➤</button>
+                <input type="file" id="fileIn" style="display:none" accept="image/*" onchange="uploadPhoto(this)">
             </div>
         </div>
 
@@ -129,8 +115,8 @@
             <header>Profile</header>
             <div style="text-align:center; padding:40px;">
                 <img id="myProfPic" style="width:120px; height:120px; border-radius:50%; border:4px solid var(--accent);">
-                <h2 id="myProfName">Anarana</h2>
-                <button class="btn" style="background:#e74c3c; margin-top:30px;" onclick="logout()">LOGOUT</button>
+                <h2 id="myProfName"></h2>
+                <button class="btn" style="background:#e74c3c; padding:15px 30px; border-radius:25px; border:none; color:white; margin-top:20px;" onclick="logout()">LOGOUT</button>
             </div>
         </div>
 
@@ -141,9 +127,15 @@
     </div>
 
     <div id="callOverlay">
-        <h2 id="callName">Anarana</h2>
-        <p>Miantso...</p>
-        <button class="btn" style="background:red; width:150px;" onclick="endCall()">HAFESANA</button>
+        <div style="text-align:center; color:white;">
+            <div id="callAv" style="width:120px; height:120px; border-radius:50%; background:var(--accent); margin: 0 auto 20px auto; display:flex; align-items:center; justify-content:center; font-size:3rem;">👤</div>
+            <h2 id="callNameDisplay">Anarana</h2>
+            <p>Miantso anao...</p>
+            <div style="display:flex; gap:30px; margin-top:50px;">
+                <button class="call-btn" style="background:#2ecc71;">📞</button>
+                <button class="call-btn" style="background:#e74c3c;" onclick="endCall()">✖</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -167,7 +159,7 @@
     let user = { name: "", avatar: "" };
     let activeChatId = "";
     let unsubMessages = null;
-    let unsubTyping = null;
+    let unsubChatDoc = null;
 
     function $(id) { return document.getElementById(id); }
 
@@ -178,7 +170,7 @@
 
     function selectAv(el) {
         document.querySelectorAll('.avatar-choice').forEach(i => i.classList.remove('selected'));
-        el.classList.add('selected');
+        el.style.border = "3px solid var(--accent)";
         user.avatar = el.src;
     }
 
@@ -186,7 +178,7 @@
         const n = $('loginName').value.trim();
         if(!n) return alert("Anarana azafady");
         user.name = n;
-        user.avatar = document.querySelector('.avatar-choice.selected').src;
+        if(!user.avatar) user.avatar = $('avatarList').children[0].src;
         await db.collection("users").doc(user.name).set({ name: user.name, avatar: user.avatar, online: true }, {merge: true});
         localStorage.lgbtUser = JSON.stringify(user);
         $('login').style.display = 'none';
@@ -204,7 +196,7 @@
                         <div class="item" onclick="openChat('${u.name}', '${u.avatar}')">
                             <img src="${u.avatar}">
                             <div class="online-dot" style="background:${u.online ? '#2ecc71' : '#95a5a6'}"></div>
-                            <div style="flex:1"><b>${u.name}</b><br><small>${u.online ? 'Online' : 'Offline'}</small></div>
+                            <div style="flex:1"><b>${u.name}</b><br><small>${u.online ? 'Mavitrika' : 'Tsy eo'}</small></div>
                         </div>`;
                 }
             });
@@ -216,7 +208,7 @@
         $('activeChatName').innerText = name;
         show('chat');
         loadMessages();
-        watchTyping(name);
+        watchChatData(name);
     }
 
     function loadMessages() {
@@ -229,8 +221,8 @@
                     const isMe = m.sender === user.name;
                     if(!isMe && m.status === 'sent') doc.ref.update({ status: 'seen' });
                     html += `
-                        <div class="msg-wrapper ${isMe ? 'me' : 'other'}">
-                            <div class="msg">${m.text || `<img src="${m.img}" style="width:100%; border-radius:10px;">`}</div>
+                        <div class="msg-wrapper ${isMe ? 'me' : 'other'}" onclick="${isMe ? `deleteMsg('${doc.id}')` : ''}">
+                            <div class="msg">${m.text ? m.text : `<img src="${m.img}" style="width:100%; max-width:200px; border-radius:10px;">`}</div>
                             <div class="seen-status">${isMe ? (m.status === 'seen' ? '✔ Vue' : '✔ Nalefa') : ''}</div>
                         </div>`;
                 });
@@ -240,29 +232,44 @@
     }
 
     function sendTyping() {
-        if(!activeChatId) return;
         const isTyping = $('msgInput').value.length > 0;
         db.collection("chats").doc(activeChatId).set({ [`typing_${user.name}`]: isTyping }, { merge: true });
     }
 
-    function watchTyping(otherName) {
-        if(unsubTyping) unsubTyping();
-        unsubTyping = db.collection("chats").doc(activeChatId).onSnapshot(doc => {
-            if(doc.exists && doc.data()[`typing_${otherName}`]) {
-                $('typingStatus').innerText = otherName + " manoratra...";
-            } else {
-                $('typingStatus').innerText = "";
+    function watchChatData(otherName) {
+        if(unsubChatDoc) unsubChatDoc();
+        unsubChatDoc = db.collection("chats").doc(activeChatId).onSnapshot(doc => {
+            if(doc.exists) {
+                const data = doc.data();
+                $('typingStatus').innerText = data[`typing_${otherName}`] ? otherName + " manoratra..." : "";
             }
         });
     }
 
     async function sendMsg() {
         const text = $('msgInput').value.trim();
-        if(!text || !activeChatId) return;
+        if(!text) return;
         const msgData = { sender: user.name, text: text, ts: Date.now(), status: 'sent' };
         $('msgInput').value = "";
         db.collection("chats").doc(activeChatId).set({ [`typing_${user.name}`]: false }, { merge: true });
         await db.collection("chats").doc(activeChatId).collection("messages").add(msgData);
+    }
+
+    async function uploadPhoto(el) {
+        const file = el.files[0];
+        if(!file) return;
+        const ref = st.ref('chats/'+Date.now()+file.name);
+        await ref.put(file);
+        const url = await ref.getDownloadURL();
+        await db.collection("chats").doc(activeChatId).collection("messages").add({
+            sender: user.name, img: url, ts: Date.now(), status: 'sent'
+        });
+    }
+
+    async function deleteMsg(id) {
+        if(confirm("Hamafa ity hafatra ity ho an'ny rehetra?")) {
+            await db.collection("chats").doc(activeChatId).collection("messages").doc(id).delete();
+        }
     }
 
     function show(id) {
@@ -273,10 +280,10 @@
         if(id === 'settings') { $('myProfPic').src = user.avatar; $('myProfName').innerText = user.name; }
     }
 
-    function makeCall() { $('callOverlay').style.display = 'flex'; $('callName').innerText = $('activeChatName').innerText; }
+    function makeCall() { $('callOverlay').style.display = 'flex'; $('callNameDisplay').innerText = $('activeChatName').innerText; }
     function endCall() { $('callOverlay').style.display = 'none'; }
     function logout() { 
-        if(user.name) db.collection("users").doc(user.name).update({ online: false });
+        db.collection("users").doc(user.name).update({ online: false });
         localStorage.clear(); location.reload(); 
     }
 
@@ -284,8 +291,7 @@
         if(localStorage.theme === 'light') document.body.classList.add('light-mode');
         if(localStorage.lgbtUser) {
             user = JSON.parse(localStorage.lgbtUser);
-            $('login').style.display = 'none';
-            $('main').style.display = 'flex';
+            $('login').style.display = 'none'; $('main').style.display = 'flex';
             loadUsers();
             db.collection("users").doc(user.name).update({ online: true });
         }
