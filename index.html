@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>LGBT+ Relation | Community Connect</title>
+    <title>LGBT+ Messenger Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -11,166 +11,162 @@
             --bg: #0f0c29;
             --glass: rgba(255, 255, 255, 0.1);
             --accent: #f39c12;
+            --text: #ffffff;
+            --msg-me: #8e44ad;
+            --msg-other: rgba(255, 255, 255, 0.15);
         }
-        * { box-sizing: border-box; transition: 0.3s; }
+
+        /* LIGHT MODE THEME */
+        body.light-mode {
+            --bg: #f0f2f5;
+            --glass: rgba(0, 0, 0, 0.05);
+            --text: #1c1e21;
+            --msg-me: #0084ff;
+            --msg-other: #e4e6eb;
+        }
+
+        * { box-sizing: border-box; transition: background 0.3s, color 0.3s; }
+        
         body { 
-            margin: 0; font-family: 'Poppins', sans-serif; 
-            height: 100vh; background: radial-gradient(circle at top, #24243e, #302b63, #0f0c29); 
-            color: white; display: flex; justify-content: center; align-items: center; overflow: hidden;
+            margin: 0; font-family: 'Poppins', sans-serif; height: 100vh;
+            background: var(--bg); color: var(--text);
+            display: flex; justify-content: center; align-items: center; overflow: hidden;
         }
+
         .app { 
-            width: 100%; max-width: 450px; height: 100vh; 
-            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1); display: flex; flex-direction: column; 
-            position: relative;
+            width: 100%; max-width: 500px; height: 100vh; 
+            background: var(--glass); backdrop-filter: blur(20px);
+            display: flex; flex-direction: column; position: relative;
+            border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1);
         }
+
+        /* HEADER */
         header { 
-            padding: 20px; text-align: center; background: rgba(0,0,0,0.4); 
-            font-weight: 600; border-bottom: 1px solid var(--glass); font-size: 1.2rem;
+            padding: 15px 20px; display: flex; align-items: center; justify-content: space-between;
+            background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--glass);
+        }
+
+        /* MESSAGES AREA */
+        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 8px; }
+        
+        .msg-wrapper { display: flex; flex-direction: column; max-width: 85%; }
+        .msg-wrapper.me { align-self: flex-end; align-items: flex-end; }
+        .msg-wrapper.other { align-self: flex-start; align-items: flex-start; }
+
+        .msg { padding: 10px 16px; border-radius: 18px; font-size: 0.95rem; line-height: 1.4; position: relative; }
+        .me .msg { background: var(--msg-me); color: white; border-bottom-right-radius: 4px; }
+        .other .msg { background: var(--msg-other); color: var(--text); border-bottom-left-radius: 4px; }
+
+        .seen-status { font-size: 0.65rem; opacity: 0.6; margin-top: 2px; }
+
+        /* INPUT AREA */
+        .controls { padding: 15px; display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,0.1); }
+        .controls input { 
+            flex: 1; padding: 12px 18px; border-radius: 25px; border: none; 
+            background: var(--glass); color: var(--text); outline: none;
         }
 
         /* SCREENS */
-        .screen { flex: 1; overflow-y: auto; padding: 20px; display: none; flex-direction: column; }
+        .screen { flex: 1; display: none; flex-direction: column; overflow-y: auto; }
         .active-screen { display: flex; }
 
-        /* LOGIN */
-        #login { text-align: center; justify-content: center; align-items: center; }
-        .avatar-list { display: flex; gap: 15px; margin: 25px 0; justify-content: center; }
-        .avatar-choice { 
-            width: 65px; height: 65px; border-radius: 50%; cursor: pointer; 
-            border: 3px solid transparent; filter: grayscale(80%); 
-        }
-        .avatar-choice.selected { filter: none; border-color: var(--accent); transform: scale(1.1); }
-
-        /* INPUTS & BUTTONS */
-        input, select { 
-            width: 100%; padding: 14px; border-radius: 12px; border: none; 
-            background: var(--glass); color: white; margin-bottom: 15px; outline: none; text-align: center;
-        }
-        .btn { 
-            width: 100%; padding: 14px; border-radius: 12px; border: none; 
-            background: var(--accent); color: white; font-weight: 600; cursor: pointer; 
-        }
-        .btn:active { transform: scale(0.98); }
-
-        /* USER LIST */
+        /* USER ITEM */
         .item { 
-            background: var(--glass); padding: 15px; border-radius: 15px; 
-            margin-bottom: 12px; display: flex; align-items: center; gap: 15px; cursor: pointer;
+            padding: 15px 20px; display: flex; align-items: center; gap: 15px; cursor: pointer;
+            border-bottom: 1px solid var(--glass);
         }
-        .item:hover { background: rgba(255,255,255,0.2); }
-        .item img { width: 45px; height: 45px; border-radius: 50%; background: #444; }
-
-        /* CHAT */
-        #messages { flex: 1; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; padding-bottom: 20px; }
-        .msg { max-width: 80%; padding: 12px 16px; border-radius: 20px; font-size: 0.95rem; line-height: 1.4; position: relative; }
-        .me { align-self: flex-end; background: #8e44ad; border-bottom-right-radius: 4px; }
-        .other { align-self: flex-start; background: var(--glass); border-bottom-left-radius: 4px; }
-        .sender { font-size: 0.7rem; opacity: 0.6; margin-bottom: 4px; display: block; }
-
-        .controls { display: flex; gap: 10px; padding: 15px; background: rgba(0,0,0,0.5); align-items: center; }
-        .controls input { margin-bottom: 0; text-align: left; }
+        .item:hover { background: var(--glass); }
+        .item img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); }
+        .online-dot { width: 12px; height: 12px; background: #2ecc71; border-radius: 50%; border: 2px solid var(--bg); margin-left: -25px; margin-top: 35px; z-index: 2; }
 
         /* NAV */
-        .nav { display: flex; background: rgba(0,0,0,0.6); padding: 10px 0; border-top: 1px solid var(--glass); }
-        .nav button { 
-            flex: 1; background: none; border: none; color: #888; 
-            display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer;
-        }
+        .nav { display: flex; padding: 10px 0; background: rgba(0,0,0,0.3); border-top: 1px solid var(--glass); }
+        .nav button { flex: 1; background: none; border: none; color: #888; cursor: pointer; font-size: 0.7rem; }
         .nav button.active { color: var(--accent); }
-        .nav .icon { font-size: 1.4rem; margin-bottom: 4px; }
+        .nav .icon { font-size: 1.5rem; display: block; }
 
-        /* MODAL */
-        #requestOverlay { 
-            position: absolute; inset: 0; background: rgba(0,0,0,0.9); 
-            display: none; z-index: 100; align-items: center; justify-content: center; padding: 30px; 
-        }
-        .modal-box { background: #1a1a2e; padding: 30px; border-radius: 25px; border: 2px solid var(--accent); text-align: center; width: 100%; }
+        /* LOGIN SCREEN */
+        #login { padding: 40px; text-align: center; justify-content: center; }
+        .avatar-choice { width: 60px; height: 60px; border-radius: 50%; margin: 5px; cursor: pointer; border: 3px solid transparent; }
+        .avatar-choice.selected { border-color: var(--accent); transform: scale(1.1); }
 
-        /* VIDEO CALL */
-        #callScreen { 
-            position: absolute; inset: 0; background: #000; z-index: 200; 
-            display: none; flex-direction: column; align-items: center; justify-content: center; 
+        .btn { padding: 15px; border-radius: 25px; border: none; background: var(--accent); color: white; font-weight: 600; cursor: pointer; width: 100%; }
+
+        /* CALL OVERLAY */
+        #callOverlay { 
+            position: absolute; inset: 0; background: #000; z-index: 500; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
         }
-        .video-box { width: 90%; height: 60%; background: #222; border-radius: 20px; overflow: hidden; margin-bottom: 20px; }
+
+        #typingStatus { font-size: 0.75rem; padding: 0 20px; color: var(--accent); height: 20px; font-style: italic; }
     </style>
 </head>
 <body>
 
 <div class="app">
-    <div id="requestOverlay">
-        <div class="modal-box">
-            <h2 id="reqFromText" style="margin:0">...</h2>
-            <p>Te hiresaka aminao manokana.</p>
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="btn" style="background:#27ae60" onclick="answerRequest(true)">MANAIKY</button>
-                <button class="btn" style="background:#c0392b" onclick="answerRequest(false)">MANDÀ</button>
-            </div>
-        </div>
-    </div>
-
     <div id="login" class="screen active-screen">
-        <h1 style="background:var(--rainbow); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2.2rem;">LGBT+ Pro</h1>
-        <p style="opacity:0.7">Misafidiana Avatar sy Anarana</p>
-        <div class="avatar-list">
-            <img class="avatar-choice selected" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" onclick="pickAvatar(this)">
-            <img class="avatar-choice" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Luna" onclick="pickAvatar(this)">
-            <img class="avatar-choice" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Akira" onclick="pickAvatar(this)">
+        <h1 style="background:var(--rainbow); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2.5rem; margin:0;">LGBT+</h1>
+        <h3>Messenger Pro</h3>
+        <div id="avatarList" style="margin: 20px 0;">
+            <img class="avatar-choice selected" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" onclick="selectAv(this)">
+            <img class="avatar-choice" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Luna" onclick="selectAv(this)">
+            <img class="avatar-choice" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Akira" onclick="selectAv(this)">
         </div>
-        <input id="userName" placeholder="Anaranao...">
-        <select id="channelSelect">
-            <option value="General">General 🌈</option>
-            <option value="Romance">Romance ❤️</option>
-            <option value="Friends">Friends 🤝</option>
-        </select>
-        <button class="btn" onclick="login()">MIDITRA NY APP</button>
+        <input type="text" id="loginName" placeholder="Anaranao..." style="width:100%; padding:15px; border-radius:25px; margin-bottom:15px; border:none; background:var(--glass); color:var(--text);">
+        <button class="btn" onclick="doLogin()">MIDITRA</button>
     </div>
 
     <div id="main" style="display:none; flex:1; flex-direction:column;">
         <div id="rooms" class="screen">
-            <header>Vondrona & Namana</header>
-            <div id="roomList" style="margin-top:20px;"></div>
-            <h3 style="margin: 25px 0 10px 0; font-size: 1rem; color: var(--accent);">👤 Namana Mavitrika</h3>
+            <header>
+                <span style="font-size:1.5rem; font-weight:600;">Chat</span>
+                <button onclick="toggleTheme()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">🌓</button>
+            </header>
             <div id="userList"></div>
         </div>
 
         <div id="chat" class="screen">
-            <header style="display:flex; justify-content:space-between; align-items:center;">
-                <button onclick="show('rooms')" style="background:none; border:none; color:white; font-size:1.5rem;">←</button>
-                <span id="chatName">Vondrona</span>
-                <button onclick="startCall()" style="background:none; border:none; font-size:1.3rem;">📹</button>
+            <header>
+                <button onclick="show('rooms')" style="background:none; border:none; color:var(--text); font-size:1.5rem;">←</button>
+                <div style="flex:1; margin-left:15px;">
+                    <b id="activeChatName">Anarana</b><br>
+                    <small id="activeStatus" style="opacity:0.6;">Online</small>
+                </div>
+                <button onclick="makeCall()" style="background:none; border:none; font-size:1.3rem; margin-right:15px;">📞</button>
+                <button onclick="makeCall()" style="background:none; border:none; font-size:1.3rem;">📹</button>
             </header>
             <div id="messages"></div>
-            <div id="typingStatus" style="font-size:0.7rem; color:var(--accent); height:20px;"></div>
+            <div id="typingStatus"></div>
             <div class="controls">
-                <button onclick="pickPhoto()" style="background:none; border:none; font-size:1.5rem;">📷</button>
-                <input id="messageInput" placeholder="Manorata hafatra...">
-                <button onclick="send()" style="background:var(--accent); border:none; padding:10px 15px; border-radius:10px; color:white;">➤</button>
+                <button onclick="$('fileIn').click()" style="background:none; border:none; font-size:1.5rem;">🖼️</button>
+                <input type="text" id="msgInput" placeholder="Hafatra..." oninput="sendTyping()">
+                <button onclick="sendMsg()" style="background:none; border:none; color:var(--accent); font-size:1.5rem; font-weight:bold;">➤</button>
+                <input type="file" id="fileIn" style="display:none" onchange="uploadFile(this)">
             </div>
-            <input id="photoInput" type="file" accept="image/*" style="display:none">
         </div>
 
         <div id="settings" class="screen">
-            <header>Ny Momba Ahy</header>
-            <div style="text-align:center; padding-top:40px;">
-                <img id="myAvatar" style="width:120px; height:120px; border-radius:50%; border:4px solid var(--accent);">
-                <h2 id="myName">...</h2>
-                <button class="btn" style="background:#c0392b; margin-top:30px;" onclick="logout()">LOGOUT</button>
+            <header>Profile</header>
+            <div style="text-align:center; padding:40px;">
+                <img id="myProfPic" style="width:120px; height:120px; border-radius:50%; border:4px solid var(--accent);">
+                <h2 id="myProfName">Anarana</h2>
+                <div style="margin-top:30px;">
+                    <button class="btn" style="background:#e74c3c;" onclick="logout()">HIALA (LOGOUT)</button>
+                </div>
             </div>
         </div>
 
         <div class="nav">
-            <button id="nav-rooms" onclick="show('rooms')" class="active"><span class="icon">👥</span>Rooms</button>
-            <button id="nav-chat" onclick="show('chat')"><span class="icon">💬</span>Chat</button>
+            <button id="nav-rooms" onclick="show('rooms')" class="active"><span class="icon">💬</span>Chats</button>
             <button id="nav-settings" onclick="show('settings')"><span class="icon">⚙️</span>Me</button>
         </div>
     </div>
 
-    <div id="callScreen">
-        <div class="video-box">
-            <div style="padding:20px; text-align:center">Video Call mbola am-panamboarana...</div>
-        </div>
-        <button class="btn" style="background:red; width:80%" onclick="endCall()">HAFESANA</button>
+    <div id="callOverlay">
+        <img id="callAv" style="width:100px; height:100px; border-radius:50%; margin-bottom:20px;">
+        <h2 id="callName">Anarana</h2>
+        <p>Miantso...</p>
+        <button class="btn" style="background:red; width:150px; margin-top:50px;" onclick="endCall()">HAFESANA</button>
     </div>
 </div>
 
@@ -179,213 +175,155 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
 <script>
-    // 1. CONFIGURATION
     const firebaseConfig = {
-  apiKey: "AIzaSyAJAy-RPWZiqrngfpOVBxsq9FSvms5hFGI",
-  authDomain: "lgbtq-pro.firebaseapp.com",
-  projectId: "lgbtq-pro",
-  storageBucket: "lgbtq-pro.firebasestorage.app",
-  messagingSenderId: "188046971429",
-  appId: "1:188046971429:web:b99215b46097c8ac8a65cc",
-  measurementId: "G-SPNZV004TM"
-};
+        apiKey: "AIzaSyAJAy-RPWZiqrngfpOVBxsq9FSvms5hFGI",
+        authDomain: "lgbtq-pro.firebaseapp.com",
+        projectId: "lgbtq-pro",
+        storageBucket: "lgbtq-pro.firebasestorage.app",
+        messagingSenderId: "188046971429",
+        appId: "1:188046971429:web:b99215b46097c8ac8a65cc"
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const st = firebase.storage();
 
-    let user = { name: "", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" };
-    let currentRoom = "";
-    let currentRequestId = null;
-    let unsubMsg = null;
+    let user = { name: "", avatar: "" };
+    let activeChatId = "";
+    let unsubMessages = null;
 
-    // 2. UTILS
     function $(id) { return document.getElementById(id); }
 
-    function show(pageId) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-        $(pageId).classList.add('active-screen');
-        document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-        $(`nav-${pageId}`).classList.add('active');
-        
-        if(pageId === 'settings') {
-            $('myName').innerText = user.name;
-            $('myAvatar').src = user.avatar;
-        }
+    function toggleTheme() {
+        document.body.classList.toggle('light-mode');
+        localStorage.theme = document.body.classList.contains('light-mode') ? 'light' : 'dark';
     }
 
-    function pickAvatar(el) {
+    function selectAv(el) {
         document.querySelectorAll('.avatar-choice').forEach(i => i.classList.remove('selected'));
         el.classList.add('selected');
         user.avatar = el.src;
     }
 
-    // 3. LOGIN & LISTS
-    async function login() {
-        const name = $('userName').value.trim();
-        if(!name) return alert("Ampidiro ny anaranao azafady!");
+    async function doLogin() {
+        const n = $('loginName').value.trim();
+        if(!n) return alert("Anarana azafady");
+        user.name = n;
+        user.avatar = document.querySelector('.avatar-choice.selected').src;
         
-        user.name = name;
-        localStorage.lgbtUser = JSON.stringify(user);
-
-        // Tehirizina ao amin'ny Firestore
         await db.collection("users").doc(user.name).set({
-            name: user.name,
-            avatar: user.avatar,
-            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-        }, {merge: true});
-
-        $('login').style.display = "none";
-        $('main').style.display = "flex";
+            name: user.name, avatar: user.avatar, lastSeen: Date.now(), online: true
+        });
         
-        loadLists();
-        watchRequests();
-        openChat("group_" + $('channelSelect').value, true);
+        localStorage.lgbtUser = JSON.stringify(user);
+        $('login').style.display = 'none';
+        $('main').style.display = 'flex';
+        loadUsers();
     }
 
-    function loadLists() {
-        const channel = $('channelSelect').value;
-        $('roomList').innerHTML = `
-            <div class="item" onclick="openChat('group_${channel}', true)" style="border: 2px solid var(--accent)">
-                <div style="font-size:1.5rem">🌈</div>
-                <div><strong>Vondrona ${channel}</strong><br><small>Hiresaka amin'ny rehetra</small></div>
-            </div>
-        `;
-
-        // Henointsika ny fiovan'ny mpampiasa
-        db.collection("users").orderBy("lastSeen", "desc").limit(20).onSnapshot(snap => {
+    function loadUsers() {
+        db.collection("users").onSnapshot(snap => {
             $('userList').innerHTML = "";
             snap.forEach(doc => {
                 if(doc.id !== user.name) {
-                    const data = doc.data();
+                    const u = doc.data();
                     $('userList').innerHTML += `
-                        <div class="item" onclick="openChat('${doc.id}', false)">
-                            <img src="${data.avatar}">
-                            <div><strong>${data.name}</strong><br><small>Online</small></div>
-                        </div>
-                    `;
+                        <div class="item" onclick="openChat('${u.name}', '${u.avatar}')">
+                            <img src="${u.avatar}">
+                            <div class="online-dot" style="background:${u.online ? '#2ecc71' : '#95a5a6'}"></div>
+                            <div style="flex:1">
+                                <b>${u.name}</b><br>
+                                <small style="opacity:0.6">${u.online ? 'Online' : 'Offline'}</small>
+                            </div>
+                        </div>`;
                 }
             });
         });
     }
 
-    // 4. CHAT LOGIC
-    async function openChat(target, isGroup) {
-        if(isGroup) {
-            setupChat(target, target.replace("group_", "Vondrona "));
-            return;
-        }
-
-        const roomId = [user.name, target].sort().join("_");
-        const friendDoc = await db.collection("friends").doc(roomId).get();
-
-        if(friendDoc.exists && friendDoc.data().status === "accepted") {
-            setupChat(roomId, target);
-        } else {
-            if(confirm(`Handefa fangatahana hiresaka amin'i ${target}?`)) {
-                await db.collection("requests").doc(roomId).set({
-                    from: user.name,
-                    to: target,
-                    status: "pending",
-                    ts: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                alert("Fangatahana nalefa! Miandry ny fanekeny ianao.");
-            }
-        }
+    function openChat(name, avatar) {
+        activeChatId = [user.name, name].sort().join("_");
+        $('activeChatName').innerText = name;
+        show('chat');
+        loadMessages();
+        watchTyping(name);
     }
 
-    function setupChat(roomId, title) {
-        if(unsubMsg) unsubMsg();
-        currentRoom = roomId;
-        $('chatName').innerText = title;
-        show('chat');
-        
-        unsubMsg = db.collection("chats").doc(currentRoom).collection("messages")
+    function loadMessages() {
+        if(unsubMessages) unsubMessages();
+        unsubMessages = db.collection("chats").doc(activeChatId).collection("messages")
             .orderBy("ts", "asc").onSnapshot(snap => {
                 $('messages').innerHTML = "";
                 snap.forEach(doc => {
-                    const d = doc.data();
-                    const isMe = d.sender === user.name;
-                    const content = d.photo ? `<img src="${d.photo}" style="width:100%; border-radius:10px">` : d.message;
+                    const m = doc.data();
+                    const isMe = m.sender === user.name;
+                    if(!isMe && m.status !== 'seen') {
+                        doc.ref.update({ status: 'seen' });
+                    }
                     $('messages').innerHTML += `
-                        <div class="msg ${isMe ? 'me' : 'other'}">
-                            <span class="sender">${isMe ? 'Izaho' : d.sender}</span>
-                            ${content}
-                        </div>
-                    `;
+                        <div class="msg-wrapper ${isMe ? 'me' : 'other'}">
+                            <div class="msg">${m.text || `<img src="${m.img}" style="width:100%; border-radius:10px;">`}</div>
+                            <div class="seen-status">${isMe ? (m.status === 'seen' ? '✔ Vue' : '✔ Nalefa') : ''}</div>
+                        </div>`;
                 });
                 $('messages').scrollTop = $('messages').scrollHeight;
             });
     }
 
-    async function send() {
-        const msg = $('messageInput').value.trim();
-        if(!msg || !currentRoom) return;
+    async function sendMsg() {
+        const text = $('msgInput').value.trim();
+        if(!text) return;
+        const msgData = {
+            sender: user.name, text: text, ts: Date.now(), status: 'sent'
+        };
+        $('msgInput').value = "";
+        await db.collection("chats").doc(activeChatId).collection("messages").add(msgData);
+        db.collection("chats").doc(activeChatId).collection("typing").doc(user.name).set({ typing: false });
+    }
 
-        await db.collection("chats").doc(currentRoom).collection("messages").add({
-            sender: user.name,
-            message: msg,
-            photo: null,
-            ts: firebase.firestore.FieldValue.serverTimestamp()
+    function sendTyping() {
+        const isTyping = $('msgInput').value.length > 0;
+        db.collection("chats").doc(activeChatId).collection("typing").doc(user.name).set({ typing: isTyping });
+    }
+
+    function watchTyping(otherName) {
+        db.collection("chats").doc(activeChatId).collection("typing").doc(otherName).onSnapshot(doc => {
+            if(doc.exists && doc.data().typing) {
+                $('typingStatus').innerText = otherName + " manoratra...";
+            } else {
+                $('typingStatus').innerText = "";
+            }
         });
-        $('messageInput').value = "";
     }
 
-    // 5. REQUESTS WATCHER
-    function watchRequests() {
-        db.collection("requests").where("to", "==", user.name).where("status", "==", "pending")
-            .onSnapshot(snap => {
-                snap.forEach(doc => {
-                    currentRequestId = doc.id;
-                    $('reqFromText').innerText = doc.data().from;
-                    $('requestOverlay').style.display = "flex";
-                });
-            });
-    }
-
-    async function answerRequest(accepted) {
-        if(!currentRequestId) return;
-        if(accepted) {
-            await db.collection("friends").doc(currentRequestId).set({
-                status: "accepted",
-                users: currentRequestId.split("_")
-            });
-            alert("Afaka miresaka ianareo izao!");
+    function show(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+        $(id).classList.add('active-screen');
+        document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+        if($('nav-'+id)) $('nav-'+id).classList.add('active');
+        if(id === 'settings') {
+            $('myProfPic').src = user.avatar;
+            $('myProfName').innerText = user.name;
         }
-        await db.collection("requests").doc(currentRequestId).delete();
-        $('requestOverlay').style.display = "none";
     }
 
-    // 6. PHOTO
-    function pickPhoto() { $('photoInput').click(); }
-    $('photoInput').onchange = async (e) => {
-        const file = e.target.files[0];
-        if(!file || !currentRoom) return;
-        
-        const ref = st.ref(`uploads/${Date.now()}_${file.name}`);
-        await ref.put(file);
-        const url = await ref.getDownloadURL();
-        
-        await db.collection("chats").doc(currentRoom).collection("messages").add({
-            sender: user.name,
-            message: null,
-            photo: url,
-            ts: firebase.firestore.FieldValue.serverTimestamp()
-        });
-    };
-
-    function startCall() { $('callScreen').style.display = "flex"; }
-    function endCall() { $('callScreen').style.display = "none"; }
+    function makeCall() {
+        $('callOverlay').style.display = 'flex';
+        $('callName').innerText = $('activeChatName').innerText;
+        $('callAv').src = document.querySelector('.item img').src;
+    }
+    function endCall() { $('callOverlay').style.display = 'none'; }
     function logout() { localStorage.clear(); location.reload(); }
 
-    // AUTO LOGIN
     window.onload = () => {
+        if(localStorage.theme === 'light') document.body.classList.add('light-mode');
         if(localStorage.lgbtUser) {
             user = JSON.parse(localStorage.lgbtUser);
-            login();
+            $('login').style.display = 'none';
+            $('main').style.display = 'flex';
+            loadUsers();
         }
     }
 </script>
 
 </body>
 </html>
-
