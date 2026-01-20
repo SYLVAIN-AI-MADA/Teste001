@@ -312,6 +312,220 @@ window.onload=()=>{
 }
 </script>
 </body>
+</html>    <div id="chat" class="screen">
+      <header>
+        <button onclick="closeChat()" style="font-size: 1.6rem;">✕</button>
+        <div style="flex:1; margin-left:10px;">
+            <b id="activeChatName" style="display:block; font-size:1.1rem"></b>
+            <small style="color: #10b981; font-size: 0.7rem;">● Online</small>
+        </div>
+        <button onclick="alert('Antso feo ho avy tsy ho ela!')" style="font-size: 1.3rem;">📞</button>
+      </header>
+      <div id="messages"></div>
+      <div id="typingStatus"></div>
+      <div class="controls">
+        <button onclick="fileIn.click()" style="font-size: 1.6rem; color: #64748b;">⊕</button>
+        <input id="msgInput" placeholder="Hafatra..." oninput="sendTyping()" onkeydown="if(event.key==='Enter') sendMsg()">
+        <button onclick="sendMsg()" style="background: var(--primary); color: white; width: 45px; height: 45px; border-radius: 50%; font-size: 1.2rem;">➤</button>
+        <input type="file" id="fileIn" hidden accept="image/*" onchange="uploadPhoto(this)">
+      </div>
+    </div>
+
+    <div id="settings" class="screen">
+      <header><b>Profile 👤</b></header>
+      <div style="text-align:center; padding:40px 20px;">
+        <div style="position: relative; display: inline-block;">
+            <img id="myProfPic" style="width:130px; height:130px; border-radius:50%; border:5px solid #3b82f6;">
+            <div style="position: absolute; bottom: 10px; right: 10px; background: #10b981; width: 25px; height: 25px; border-radius: 50%; border: 3px solid var(--bg);"></div>
+        </div>
+        <h2 id="myProfName" style="margin: 15px 0 5px;"></h2>
+        <p style="opacity: 0.5; font-size: 0.8rem; margin-bottom: 30px;">Mpikambana GlobalChat</p>
+        
+        <div style="background: var(--glass); border-radius: 20px; padding: 20px; text-align: left; margin-bottom: 30px;">
+            <p style="margin: 0; font-size: 0.9rem;"><b>Auteur:</b> Sylvain Solofoniaina</p>
+            <p style="margin: 10px 0 0; font-size: 0.9rem;"><b>Version:</b> 2.0.1 Pro (Stable)</p>
+            <p style="margin: 10px 0 0; font-size: 0.9rem;"><b>Statut:</b> Voaaro (Encrypted)</p>
+        </div>
+
+        <button onclick="logout()" style="background:#ef4444; color:white; padding:15px 40px; border-radius:20px; font-weight: bold; width: 100%;">HIALA (LOGOUT)</button>
+        <p class="copyright">Copyright © 2024 Sylvain Solofoniaina</p>
+      </div>
+    </div>
+
+    <div class="nav">
+      <button id="nav-rooms" class="active" onclick="show('rooms')"><b>💬</b><span>Chats</span></button>
+      <button id="nav-settings" onclick="show('settings')"><b>👤</b><span>Me</span></button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyAJAy-RPWZiqrngfpOVBxsq9FSvms5hFGI",
+  authDomain: "lgbtq-pro.firebaseapp.com",
+  projectId: "lgbtq-pro",
+  storageBucket: "lgbtq-pro.firebasestorage.app",
+  messagingSenderId: "188046971429",
+  appId: "1:188046971429:web:b99215b46097c8ac8a65cc"
+});
+
+const db = firebase.firestore();
+const st = firebase.storage();
+let user = {name:"", avatar:""};
+let activeChatId = "";
+let unsubMsg = null;
+let unsubTyping = null;
+
+function $(i){return document.getElementById(i);}
+
+function selectAv(el){
+  document.querySelectorAll('.avatar-choice').forEach(a=>a.classList.remove('selected'));
+  el.classList.add('selected');
+  user.avatar = el.src;
+}
+
+async function doLogin(){
+  const n = $("loginName").value.trim();
+  if(!n) return alert("Ampidiro ny anaranao!");
+  user.name = n;
+  user.avatar = document.querySelector('.avatar-choice.selected').src;
+
+  await db.collection("users").doc(user.name).set({
+    name:user.name, avatar:user.avatar, online:true, lastSeen: Date.now()
+  },{merge:true});
+
+  localStorage.lgbtUser = JSON.stringify(user);
+  $("login").style.display="none";
+  $("main").style.display="flex";
+  loadUsers();
+}
+
+function loadUsers(){
+  db.collection("users").onSnapshot(s=>{
+    $("userList").innerHTML="";
+    s.forEach(d=>{
+      if(d.id !== user.name){
+        const u = d.data();
+        $("userList").innerHTML += `
+          <div class="item" onclick="openChat('${u.name}')">
+            <img src="${u.avatar}">
+            <div style="flex:1">
+               <b style="font-size:1.1rem">${u.name}</b><br>
+               <small style="opacity:0.6">${u.online ? '🟢 Mavitrika' : '⚪ Tsy eo'}</small>
+            </div>
+            <span style="opacity:0.3">➔</span>
+          </div>`;
+      }
+    });
+  });
+}
+
+function openChat(otherName){
+  activeChatId = [user.name, otherName].sort().join("_");
+  $("activeChatName").innerText = otherName;
+  show('chat');
+
+  if(unsubMsg) unsubMsg();
+  unsubMsg = db.collection("chats").doc(activeChatId).collection("messages").orderBy("ts")
+    .onSnapshot(s => {
+      $("messages").innerHTML = "";
+      s.forEach(d => {
+        const m = d.data();
+        const isMe = m.sender === user.name;
+        if(!isMe && m.status === 'sent') d.ref.update({status:'seen'});
+
+        $("messages").innerHTML += `
+          <div class="msg-wrapper ${isMe?'me':'other'}" onclick="deleteMsg('${d.id}', ${isMe})">
+            <div class="msg">${m.text || `<img src="${m.img}" style="max-width:200px; border-radius:12px">`}</div>
+            <div class="seen-status">${isMe ? (m.status === 'seen' ? '✔✔ Vue' : '✔ Nalefa') : ''}</div>
+          </div>`;
+      });
+      $("messages").scrollTop = $("messages").scrollHeight;
+    });
+
+  if(unsubTyping) unsubTyping();
+  unsubTyping = db.collection("chats").doc(activeChatId).onSnapshot(d => {
+    if(d.exists()){
+      const data = d.data();
+      $("typingStatus").innerText = data[`typing_${otherName}`] ? otherName + " manoratra..." : "";
+    }
+  });
+}
+
+function sendTyping(){
+  const isTyping = $("msgInput").value.trim().length > 0;
+  db.collection("chats").doc(activeChatId).set({
+    [`typing_${user.name}`]: isTyping
+  }, {merge:true});
+}
+
+function sendMsg(){
+  const val = $("msgInput").value.trim();
+  if(!val) return;
+  db.collection("chats").doc(activeChatId).collection("messages").add({
+    sender: user.name, text: val, ts: Date.now(), status: 'sent'
+  });
+  $("msgInput").value = "";
+  db.collection("chats").doc(activeChatId).set({ [`typing_${user.name}`]: false }, {merge:true});
+}
+
+async function uploadPhoto(i){
+  const f = i.files[0];
+  if(!f) return;
+  const r = st.ref("chats/"+Date.now()+f.name);
+  await r.put(f);
+  const url = await r.getDownloadURL();
+  db.collection("chats").doc(activeChatId).collection("messages").add({
+    sender: user.name, img: url, ts: Date.now(), status: 'sent'
+  });
+}
+
+function deleteMsg(id, isMe) {
+    if(!isMe) return;
+    if(confirm("Hamafa ity hafatra ity ho an'ny rehetra?")) {
+        db.collection("chats").doc(activeChatId).collection("messages").doc(id).delete();
+    }
+}
+
+function closeChat(){
+  if(activeChatId) db.collection("chats").doc(activeChatId).set({ [`typing_${user.name}`]: false }, {merge:true});
+  show('rooms');
+}
+
+function toggleTheme(){ document.body.classList.toggle('light-mode'); }
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+  $(id).classList.add('active-screen');
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  if($('nav-'+id)) $('nav-'+id).classList.add('active');
+  if(id === 'settings'){
+    $("myProfPic").src = user.avatar;
+    $("myProfName").innerText = user.name;
+  }
+}
+
+function logout(){
+  if(user.name) db.collection("users").doc(user.name).update({online:false});
+  localStorage.clear();
+  location.reload();
+}
+
+window.onload=()=>{
+  if(localStorage.lgbtUser){
+    user = JSON.parse(localStorage.lgbtUser);
+    $("login").style.display="none";
+    $("main").style.display="flex";
+    loadUsers();
+    db.collection("users").doc(user.name).update({online:true});
+  }
+}
+</script>
+</body>
   </html><!DOCTYPE html>
 <html lang="mg">
 <head>
@@ -1153,3 +1367,4 @@ window.onload=()=>{
 </script>
 </body>
 </html>
+
