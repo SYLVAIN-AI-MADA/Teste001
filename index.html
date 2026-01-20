@@ -28,91 +28,78 @@ body.light-mode {
 html, body { height: 100%; margin: 0; overscroll-behavior: none; }
 body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; }
 
-.app { width: 100%; max-width: 500px; height: 100dvh; display: flex; flex-direction: column; background: var(--bg); position: relative; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+.app { width: 100%; max-width: 500px; height: 100dvh; display: flex; flex-direction: column; background: var(--bg); position: relative; }
 
 header { padding: 15px; display: flex; align-items: center; justify-content: space-between; background: var(--glass); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 10; }
 
 .screen { flex: 1; display: none; flex-direction: column; overflow: hidden; }
 .active-screen { display: flex; }
 
-#messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth; }
+#messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
 .msg-wrapper { max-width: 80%; display: flex; flex-direction: column; }
 .me { align-self: flex-end; }
 .other { align-self: flex-start; }
 
-.msg { padding: 12px 16px; border-radius: 20px; font-size: .95rem; line-height: 1.4; position: relative; }
+.msg { padding: 12px 16px; border-radius: 20px; font-size: .95rem; line-height: 1.4; }
 .me .msg { background: var(--msg-me); color: #fff; border-bottom-right-radius: 4px; }
 .other .msg { background: var(--msg-other); color: var(--text); border-bottom-left-radius: 4px; }
 
 .seen-status { font-size: .65rem; opacity: .6; margin-top: 4px; text-align: right; }
 #typingStatus { padding: 5px 20px; font-size: .75rem; color: #3b82f6; height: 25px; font-weight: 600; font-style: italic; }
 
-.controls { display: flex; gap: 10px; padding: 12px; background: var(--glass); backdrop-filter: blur(10px); align-items: center; }
+.controls { display: flex; gap: 10px; padding: 12px; background: var(--glass); backdrop-filter: blur(10px); }
 .controls input { flex: 1; padding: 12px 20px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); background: var(--bg); color: var(--text); outline: none; }
 
-button { background: none; border: none; color: var(--primary); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+button { background: none; border: none; color: var(--primary); cursor: pointer; }
 
-.item { display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid var(--glass); cursor: pointer; transition: 0.2s; }
-.item:active { background: var(--glass); }
+.item { display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid var(--glass); cursor: pointer; }
 .item img { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 2px solid var(--secondary); }
 
-.nav { display: flex; background: var(--glass); border-top: 1px solid rgba(255,255,255,0.05); padding-bottom: env(safe-area-inset-bottom); }
-.nav button { flex: 1; padding: 12px; font-size: .75rem; color: #64748b; flex-direction: column; gap: 4px; transition: 0.3s; }
-.nav button.active { color: #3b82f6; transform: translateY(-2px); }
-.nav b { font-size: 1.4rem; }
+.nav { display: flex; background: var(--glass); border-top: 1px solid rgba(255,255,255,0.05); }
+.nav button { flex: 1; padding: 12px; font-size: .75rem; color: #64748b; flex-direction: column; gap: 4px; }
+.nav button.active { color: #3b82f6; }
 
-.avatar-choice { width: 75px; height: 75px; border-radius: 50%; margin: 10px; border: 3px solid transparent; cursor: pointer; transition: 0.3s; }
-.avatar-choice.selected { border-color: #3b82f6; transform: scale(1.1); box-shadow: 0 0 15px #3b82f6; }
+.avatar-choice { width: 75px; height: 75px; border-radius: 50%; margin: 10px; border: 3px solid transparent; cursor: pointer; }
+.avatar-choice.selected { border-color: #3b82f6; transform: scale(1.1); }
 
-.copyright { font-size: 0.7rem; opacity: 0.4; margin-top: 20px; text-align: center; width: 100%; }
+.copyright { font-size: 0.7rem; opacity: 0.4; margin-top: 20px; text-align: center; }
 </style>
 </head>
 <body>
 
 <div class="app">
   <div id="login" class="screen active-screen" style="justify-content: center; align-items: center; text-align: center; padding: 20px;">
-    <div style="background: var(--msg-me); width: 80px; height: 80px; border-radius: 20px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: white; box-shadow: 0 10px 20px rgba(106, 17, 203, 0.3);">🚀</div>
-    <h1 style="font-size: 2.2rem; margin: 0; background: var(--msg-me); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">GlobalChat</h1>
-    <p style="opacity: 0.6; font-size: 0.9rem;">By Sylvain Solofoniaina</p>
+    <h1 style="font-size: 2.2rem; background: var(--msg-me); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">GlobalChat</h1>
+    <p style="opacity: 0.6;">By Sylvain Solofoniaina</p>
     
     <div id="avatarList" style="margin: 20px 0;">
       <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Mamy" class="avatar-choice selected" onclick="selectAv(this)">
       <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sary" class="avatar-choice" onclick="selectAv(this)">
     </div>
     
-    <input id="loginName" placeholder="Anaranao..." style="width: 85%; padding: 16px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); background: var(--glass); color: white; outline: none; text-align: center; font-size: 1rem;">
-    <button onclick="doLogin()" style="background: var(--msg-me); color: white; padding: 16px; border-radius: 15px; font-weight: bold; width: 85%; margin-top: 20px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">HIDITRA IZAO ➔</button>
-    
-    <div class="copyright">
-        © 2024 GlobalChat Pro. All Rights Reserved.<br>
-        Designed by <b>Sylvain Solofoniaina</b>
-    </div>
+    <input id="loginName" placeholder="Anaranao..." style="width: 85%; padding: 16px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); background: var(--glass); color: white; outline: none; text-align: center;">
+    <button onclick="doLogin()" style="background: var(--msg-me); color: white; padding: 16px; border-radius: 15px; font-weight: bold; width: 85%; margin-top: 20px; border: none;">HIDITRA ➔</button>
+    <div class="copyright">© 2024 Sylvain Solofoniaina</div>
   </div>
 
   <div id="main" style="display:none; flex:1; flex-direction:column">
     <div id="rooms" class="screen active-screen">
-      <header>
-        <b style="font-size: 1.4rem; letter-spacing: -0.5px;">Hafatra 💬</b>
-        <button onclick="toggleTheme()" style="font-size: 1.2rem;">🌓</button>
-      </header>
+      <header><b>Hafatra 💬</b><button onclick="toggleTheme()">🌓</button></header>
       <div id="userList"></div>
     </div>
 
     <div id="chat" class="screen">
       <header>
-        <button onclick="closeChat()" style="font-size: 1.6rem;">✕</button>
-        <div style="flex:1; margin-left:10px;">
-            <b id="activeChatName" style="display:block; font-size:1.1rem"></b>
-            <small style="color: #10b981; font-size: 0.7rem;">● Online</small>
-        </div>
-        <button onclick="alert('Antso feo ho avy tsy ho ela!')" style="font-size: 1.3rem;">📞</button>
+        <button onclick="closeChat()">✕</button>
+        <b id="activeChatName"></b>
+        <button onclick="alert('Antso feo ho avy...')">📞</button>
       </header>
       <div id="messages"></div>
       <div id="typingStatus"></div>
       <div class="controls">
-        <button onclick="fileIn.click()" style="font-size: 1.6rem; color: #64748b;">⊕</button>
+        <button onclick="fileIn.click()">⊕</button>
         <input id="msgInput" placeholder="Hafatra..." oninput="sendTyping()" onkeydown="if(event.key==='Enter') sendMsg()">
-        <button onclick="sendMsg()" style="background: var(--primary); color: white; width: 45px; height: 45px; border-radius: 50%; font-size: 1.2rem;">➤</button>
+        <button onclick="sendMsg()" style="background: var(--primary); color: white; width: 40px; height: 40px; border-radius: 50%;">➤</button>
         <input type="file" id="fileIn" hidden accept="image/*" onchange="uploadPhoto(this)">
       </div>
     </div>
@@ -120,27 +107,19 @@ button { background: none; border: none; color: var(--primary); cursor: pointer;
     <div id="settings" class="screen">
       <header><b>Profile 👤</b></header>
       <div style="text-align:center; padding:40px 20px;">
-        <div style="position: relative; display: inline-block;">
-            <img id="myProfPic" style="width:130px; height:130px; border-radius:50%; border:5px solid #3b82f6;">
-            <div style="position: absolute; bottom: 10px; right: 10px; background: #10b981; width: 25px; height: 25px; border-radius: 50%; border: 3px solid var(--bg);"></div>
+        <img id="myProfPic" style="width:120px; height:120px; border-radius:50%; border:4px solid #3b82f6;">
+        <h2 id="myProfName" style="margin-top:15px"></h2>
+        <div style="background: var(--glass); border-radius: 15px; padding: 15px; margin: 20px 0; text-align: left;">
+            <p style="margin:0; font-size:0.8rem"><b>Auteur:</b> Sylvain Solofoniaina</p>
+            <p style="margin:5px 0 0; font-size:0.8rem"><b>Privacité:</b> Encrypted Private Chat</p>
         </div>
-        <h2 id="myProfName" style="margin: 15px 0 5px;"></h2>
-        <p style="opacity: 0.5; font-size: 0.8rem; margin-bottom: 30px;">Mpikambana GlobalChat</p>
-        
-        <div style="background: var(--glass); border-radius: 20px; padding: 20px; text-align: left; margin-bottom: 30px;">
-            <p style="margin: 0; font-size: 0.9rem;"><b>Auteur:</b> Sylvain Solofoniaina</p>
-            <p style="margin: 10px 0 0; font-size: 0.9rem;"><b>Version:</b> 2.0.1 Pro (Stable)</p>
-            <p style="margin: 10px 0 0; font-size: 0.9rem;"><b>Statut:</b> Voaaro (Encrypted)</p>
-        </div>
-
-        <button onclick="logout()" style="background:#ef4444; color:white; padding:15px 40px; border-radius:20px; font-weight: bold; width: 100%;">HIALA (LOGOUT)</button>
-        <p class="copyright">Copyright © 2024 Sylvain Solofoniaina</p>
+        <button onclick="logout()" style="background:#ef4444; color:white; padding:15px; border-radius:15px; width:100%; border:none; font-weight:bold;">LOGOUT</button>
       </div>
     </div>
 
     <div class="nav">
-      <button id="nav-rooms" class="active" onclick="show('rooms')"><b>💬</b><span>Chats</span></button>
-      <button id="nav-settings" onclick="show('settings')"><b>👤</b><span>Me</span></button>
+      <button id="nav-rooms" class="active" onclick="show('rooms')"><b>💬</b>Chats</button>
+      <button id="nav-settings" onclick="show('settings')"><b>👤</b>Profile</button>
     </div>
   </div>
 </div>
@@ -181,7 +160,7 @@ async function doLogin(){
   user.avatar = document.querySelector('.avatar-choice.selected').src;
 
   await db.collection("users").doc(user.name).set({
-    name:user.name, avatar:user.avatar, online:true, lastSeen: Date.now()
+    name:user.name, avatar:user.avatar, online:true
   },{merge:true});
 
   localStorage.lgbtUser = JSON.stringify(user);
@@ -199,11 +178,7 @@ function loadUsers(){
         $("userList").innerHTML += `
           <div class="item" onclick="openChat('${u.name}')">
             <img src="${u.avatar}">
-            <div style="flex:1">
-               <b style="font-size:1.1rem">${u.name}</b><br>
-               <small style="opacity:0.6">${u.online ? '🟢 Mavitrika' : '⚪ Tsy eo'}</small>
-            </div>
-            <span style="opacity:0.3">➔</span>
+            <div><b>${u.name}</b><br><small style="opacity:0.6">${u.online?'Online':'Offline'}</small></div>
           </div>`;
       }
     });
@@ -211,12 +186,14 @@ function loadUsers(){
 }
 
 function openChat(otherName){
+  // FAMARITANA NY ID MANOKANA HO AN'NY OLONA ROA (Private Room ID)
   activeChatId = [user.name, otherName].sort().join("_");
   $("activeChatName").innerText = otherName;
   show('chat');
 
+  // Mihaino ny hafatra ao amin'ny ROOM manokana ihany
   if(unsubMsg) unsubMsg();
-  unsubMsg = db.collection("chats").doc(activeChatId).collection("messages").orderBy("ts")
+  unsubMsg = db.collection("private_chats").doc(activeChatId).collection("messages").orderBy("ts")
     .onSnapshot(s => {
       $("messages").innerHTML = "";
       s.forEach(d => {
@@ -227,14 +204,14 @@ function openChat(otherName){
         $("messages").innerHTML += `
           <div class="msg-wrapper ${isMe?'me':'other'}" onclick="deleteMsg('${d.id}', ${isMe})">
             <div class="msg">${m.text || `<img src="${m.img}" style="max-width:200px; border-radius:12px">`}</div>
-            <div class="seen-status">${isMe ? (m.status === 'seen' ? '✔✔ Vue' : '✔ Nalefa') : ''}</div>
+            <div class="seen-status">${isMe ? (m.status === 'seen' ? '✔✔ Vue' : '✔') : ''}</div>
           </div>`;
       });
       $("messages").scrollTop = $("messages").scrollHeight;
     });
 
   if(unsubTyping) unsubTyping();
-  unsubTyping = db.collection("chats").doc(activeChatId).onSnapshot(d => {
+  unsubTyping = db.collection("private_chats").doc(activeChatId).onSnapshot(d => {
     if(d.exists()){
       const data = d.data();
       $("typingStatus").innerText = data[`typing_${otherName}`] ? otherName + " manoratra..." : "";
@@ -244,7 +221,7 @@ function openChat(otherName){
 
 function sendTyping(){
   const isTyping = $("msgInput").value.trim().length > 0;
-  db.collection("chats").doc(activeChatId).set({
+  db.collection("private_chats").doc(activeChatId).set({
     [`typing_${user.name}`]: isTyping
   }, {merge:true});
 }
@@ -252,33 +229,32 @@ function sendTyping(){
 function sendMsg(){
   const val = $("msgInput").value.trim();
   if(!val) return;
-  db.collection("chats").doc(activeChatId).collection("messages").add({
+  db.collection("private_chats").doc(activeChatId).collection("messages").add({
     sender: user.name, text: val, ts: Date.now(), status: 'sent'
   });
   $("msgInput").value = "";
-  db.collection("chats").doc(activeChatId).set({ [`typing_${user.name}`]: false }, {merge:true});
+  db.collection("private_chats").doc(activeChatId).set({ [`typing_${user.name}`]: false }, {merge:true});
 }
 
 async function uploadPhoto(i){
   const f = i.files[0];
   if(!f) return;
-  const r = st.ref("chats/"+Date.now()+f.name);
+  const r = st.ref("private/"+Date.now()+f.name);
   await r.put(f);
   const url = await r.getDownloadURL();
-  db.collection("chats").doc(activeChatId).collection("messages").add({
+  db.collection("private_chats").doc(activeChatId).collection("messages").add({
     sender: user.name, img: url, ts: Date.now(), status: 'sent'
   });
 }
 
 function deleteMsg(id, isMe) {
-    if(!isMe) return;
-    if(confirm("Hamafa ity hafatra ity ho an'ny rehetra?")) {
-        db.collection("chats").doc(activeChatId).collection("messages").doc(id).delete();
+    if(isMe && confirm("Hamafa ity hafatra ity?")) {
+        db.collection("private_chats").doc(activeChatId).collection("messages").doc(id).delete();
     }
 }
 
 function closeChat(){
-  if(activeChatId) db.collection("chats").doc(activeChatId).set({ [`typing_${user.name}`]: false }, {merge:true});
+  if(activeChatId) db.collection("private_chats").doc(activeChatId).set({ [`typing_${user.name}`]: false }, {merge:true});
   show('rooms');
 }
 
