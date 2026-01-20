@@ -312,220 +312,7 @@ window.onload=()=>{
 }
 </script>
 </body>
-</html>      <header>
-        <button onclick="closeChat()" style="font-size: 1.6rem;">✕</button>
-        <div style="flex:1; margin-left:10px;">
-            <b id="activeChatName" style="display:block; font-size:1.1rem"></b>
-            <small style="color: #10b981; font-size: 0.7rem;">● Online</small>
-        </div>
-        <button onclick="alert('Antso feo ho avy tsy ho ela!')" style="font-size: 1.3rem;">📞</button>
-      </header>
-      <div id="messages"></div>
-      <div id="typingStatus"></div>
-      <div class="controls">
-        <button onclick="fileIn.click()" style="font-size: 1.6rem; color: #64748b;">⊕</button>
-        <input id="msgInput" placeholder="Hafatra..." oninput="sendTyping()" onkeydown="if(event.key==='Enter') sendMsg()">
-        <button onclick="sendMsg()" style="background: var(--primary); color: white; width: 45px; height: 45px; border-radius: 50%; font-size: 1.2rem;">➤</button>
-        <input type="file" id="fileIn" hidden accept="image/*" onchange="uploadPhoto(this)">
-      </div>
-    </div>
-
-    <div id="settings" class="screen">
-      <header><b>Profile 👤</b></header>
-      <div style="text-align:center; padding:40px 20px;">
-        <div style="position: relative; display: inline-block;">
-            <img id="myProfPic" style="width:130px; height:130px; border-radius:50%; border:5px solid #3b82f6;">
-            <div style="position: absolute; bottom: 10px; right: 10px; background: #10b981; width: 25px; height: 25px; border-radius: 50%; border: 3px solid var(--bg);"></div>
-        </div>
-        <h2 id="myProfName" style="margin: 15px 0 5px;"></h2>
-        <p style="opacity: 0.5; font-size: 0.8rem; margin-bottom: 30px;">Mpikambana GlobalChat</p>
-        
-        <div style="background: var(--glass); border-radius: 20px; padding: 20px; text-align: left; margin-bottom: 30px;">
-            <p style="margin: 0; font-size: 0.9rem;"><b>Auteur:</b> Sylvain Solofoniaina</p>
-            <p style="margin: 10px 0 0; font-size: 0.9rem;"><b>Version:</b> 2.0.1 Pro (Stable)</p>
-            <p style="margin: 10px 0 0; font-size: 0.9rem;"><b>Statut:</b> Voaaro (Encrypted)</p>
-        </div>
-
-        <button onclick="logout()" style="background:#ef4444; color:white; padding:15px 40px; border-radius:20px; font-weight: bold; width: 100%;">HIALA (LOGOUT)</button>
-        <p class="copyright">Copyright © 2024 Sylvain Solofoniaina</p>
-      </div>
-    </div>
-
-    <div class="nav">
-      <button id="nav-rooms" class="active" onclick="show('rooms')"><b>💬</b><span>Chats</span></button>
-      <button id="nav-settings" onclick="show('settings')"><b>👤</b><span>Me</span></button>
-    </div>
-  </div>
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
-
-<script>
-firebase.initializeApp({
-  apiKey: "AIzaSyAJAy-RPWZiqrngfpOVBxsq9FSvms5hFGI",
-  authDomain: "lgbtq-pro.firebaseapp.com",
-  projectId: "lgbtq-pro",
-  storageBucket: "lgbtq-pro.firebasestorage.app",
-  messagingSenderId: "188046971429",
-  appId: "1:188046971429:web:b99215b46097c8ac8a65cc"
-});
-
-const db = firebase.firestore();
-const st = firebase.storage();
-let user = {name:"", avatar:""};
-let activeChatId = "";
-let unsubMsg = null;
-let unsubTyping = null;
-
-function $(i){return document.getElementById(i);}
-
-function selectAv(el){
-  document.querySelectorAll('.avatar-choice').forEach(a=>a.classList.remove('selected'));
-  el.classList.add('selected');
-  user.avatar = el.src;
-}
-
-async function doLogin(){
-  const n = $("loginName").value.trim();
-  if(!n) return alert("Ampidiro ny anaranao!");
-  user.name = n;
-  user.avatar = document.querySelector('.avatar-choice.selected').src;
-
-  await db.collection("users").doc(user.name).set({
-    name:user.name, avatar:user.avatar, online:true, lastSeen: Date.now()
-  },{merge:true});
-
-  localStorage.lgbtUser = JSON.stringify(user);
-  $("login").style.display="none";
-  $("main").style.display="flex";
-  loadUsers();
-}
-
-function loadUsers(){
-  db.collection("users").onSnapshot(s=>{
-    $("userList").innerHTML="";
-    s.forEach(d=>{
-      if(d.id !== user.name){
-        const u = d.data();
-        $("userList").innerHTML += `
-          <div class="item" onclick="openChat('${u.name}')">
-            <img src="${u.avatar}">
-            <div style="flex:1">
-               <b style="font-size:1.1rem">${u.name}</b><br>
-               <small style="opacity:0.6">${u.online ? '🟢 Mavitrika' : '⚪ Tsy eo'}</small>
-            </div>
-            <span style="opacity:0.3">➔</span>
-          </div>`;
-      }
-    });
-  });
-}
-
-function openChat(otherName){
-  activeChatId = [user.name, otherName].sort().join("_");
-  $("activeChatName").innerText = otherName;
-  show('chat');
-
-  if(unsubMsg) unsubMsg();
-  unsubMsg = db.collection("chats").doc(activeChatId).collection("messages").orderBy("ts")
-    .onSnapshot(s => {
-      $("messages").innerHTML = "";
-      s.forEach(d => {
-        const m = d.data();
-        const isMe = m.sender === user.name;
-        if(!isMe && m.status === 'sent') d.ref.update({status:'seen'});
-
-        $("messages").innerHTML += `
-          <div class="msg-wrapper ${isMe?'me':'other'}" onclick="deleteMsg('${d.id}', ${isMe})">
-            <div class="msg">${m.text || `<img src="${m.img}" style="max-width:200px; border-radius:12px">`}</div>
-            <div class="seen-status">${isMe ? (m.status === 'seen' ? '✔✔ Vue' : '✔ Nalefa') : ''}</div>
-          </div>`;
-      });
-      $("messages").scrollTop = $("messages").scrollHeight;
-    });
-
-  if(unsubTyping) unsubTyping();
-  unsubTyping = db.collection("chats").doc(activeChatId).onSnapshot(d => {
-    if(d.exists()){
-      const data = d.data();
-      $("typingStatus").innerText = data[`typing_${otherName}`] ? otherName + " manoratra..." : "";
-    }
-  });
-}
-
-function sendTyping(){
-  const isTyping = $("msgInput").value.trim().length > 0;
-  db.collection("chats").doc(activeChatId).set({
-    [`typing_${user.name}`]: isTyping
-  }, {merge:true});
-}
-
-function sendMsg(){
-  const val = $("msgInput").value.trim();
-  if(!val) return;
-  db.collection("chats").doc(activeChatId).collection("messages").add({
-    sender: user.name, text: val, ts: Date.now(), status: 'sent'
-  });
-  $("msgInput").value = "";
-  db.collection("chats").doc(activeChatId).set({ [`typing_${user.name}`]: false }, {merge:true});
-}
-
-async function uploadPhoto(i){
-  const f = i.files[0];
-  if(!f) return;
-  const r = st.ref("chats/"+Date.now()+f.name);
-  await r.put(f);
-  const url = await r.getDownloadURL();
-  db.collection("chats").doc(activeChatId).collection("messages").add({
-    sender: user.name, img: url, ts: Date.now(), status: 'sent'
-  });
-}
-
-function deleteMsg(id, isMe) {
-    if(!isMe) return;
-    if(confirm("Hamafa ity hafatra ity ho an'ny rehetra?")) {
-        db.collection("chats").doc(activeChatId).collection("messages").doc(id).delete();
-    }
-}
-
-function closeChat(){
-  if(activeChatId) db.collection("chats").doc(activeChatId).set({ [`typing_${user.name}`]: false }, {merge:true});
-  show('rooms');
-}
-
-function toggleTheme(){ document.body.classList.toggle('light-mode'); }
-
-function show(id){
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-  $(id).classList.add('active-screen');
-  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-  if($('nav-'+id)) $('nav-'+id).classList.add('active');
-  if(id === 'settings'){
-    $("myProfPic").src = user.avatar;
-    $("myProfName").innerText = user.name;
-  }
-}
-
-function logout(){
-  if(user.name) db.collection("users").doc(user.name).update({online:false});
-  localStorage.clear();
-  location.reload();
-}
-
-window.onload=()=>{
-  if(localStorage.lgbtUser){
-    user = JSON.parse(localStorage.lgbtUser);
-    $("login").style.display="none";
-    $("main").style.display="flex";
-    loadUsers();
-    db.collection("users").doc(user.name).update({online:true});
-  }
-}
-</script>
-</body>
-    </html><!DOCTYPE html>
+  </html><!DOCTYPE html>
 <html lang="mg">
 <head>
 <meta charset="UTF-8">
@@ -779,7 +566,7 @@ function sendTyping(){
 function sendMsg(){
   const val = $("msgInput").value.trim();
   if(!val) return;
-  db.collection("chats").dhoc(activeChatId).collection("messages").add({
+  db.collection("chats").doc(activeChatId).collection("messages").add({
     sender: user.name, text: val, ts: Date.now(), status: 'sent'
   });
   $("msgInput").value = "";
@@ -839,5 +626,530 @@ window.onload=()=>{
 }
 </script>
 </body>
-    </html>
+</html><!DOCTYPE html>
+<html lang="mg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>GlobalChat Pro | Sylvain Solofoniaina</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #6a11cb;
+  --secondary: #2575fc;
+  --bg: #0f172a;
+  --glass: rgba(255,255,255,.08);
+  --text: #f8fafc;
+  --msg-me: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  --msg-other: #1e293b;
+}
 
+body.light-mode {
+  --bg: #f8fafc;
+  --glass: rgba(0,0,0,.04);
+  --text: #0f172a;
+  --msg-me: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  --msg-other: #f1f5f9;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; margin: 0; overscroll-behavior: none; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; }
+
+.app { width: 100%; max-width: 500px; height: 100dvh; display: flex; flex-direction: column; background: var(--bg); position: relative; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+
+header { padding: 15px; display: flex; align-items: center; justify-content: space-between; background: var(--glass); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 10; }
+
+.screen { flex: 1; display: none; flex-direction: column; overflow: hidden; }
+.active-screen { display: flex; }
+
+#messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth; }
+.msg-wrapper { max-width: 80%; display: flex; flex-direction: column; }
+.me { align-self: flex-end; }
+.other { align-self: flex-start; }
+
+.msg { padding: 12px 16px; border-radius: 20px; font-size: .95rem; line-height: 1.4; position: relative; }
+.me .msg { background: var(--msg-me); color: #fff; border-bottom-right-radius: 4px; }
+.other .msg { background: var(--msg-other); color: var(--text); border-bottom-left-radius: 4px; }
+
+.seen-status { font-size: .65rem; opacity: .6; margin-top: 4px; text-align: right; }
+#typingStatus { padding: 5px 20px; font-size: .75rem; color: #3b82f6; height: 25px; font-weight: 600; font-style: italic; }
+
+.controls { display: flex; gap: 10px; padding: 12px; background: var(--glass); backdrop-filter: blur(10px); align-items: center; }
+.controls input { flex: 1; padding: 12px 20px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); background: var(--bg); color: var(--text); outline: none; }
+
+button { background: none; border: none; color: var(--primary); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+.item { display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid var(--glass); cursor: pointer; transition: 0.2s; }
+.item:active { background: var(--glass); }
+.item img { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 2px solid var(--secondary); }
+
+.nav { display: flex; background: var(--glass); border-top: 1px solid rgba(255,255,255,0.05); padding-bottom: env(safe-area-inset-bottom); }
+.nav button { flex: 1; padding: 12px; font-size: .75rem; color: #64748b; flex-direction: column; gap: 4px; transition: 0.3s; }
+.nav button.active { color: #3b82f6; transform: translateY(-2px); }
+.nav b { font-size: 1.4rem; }
+
+.avatar-choice { width: 75px; height: 75px; border-radius: 50%; margin: 10px; border: 3px solid transparent; cursor: pointer; transition: 0.3s; }
+.avatar-choice.selected { border-color: #3b82f6; transform: scale(1.1); box-shadow: 0 0 15px #3b82f6; }
+
+.copyright { font-size: 0.7rem; opacity: 0.4; margin-top: 20px; text-align: center; width: 100%; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div id="login" class="screen active-screen" style="justify-content: center; align-items: center; text-align: center; padding: 20px;">
+    <div style="background: var(--msg-me); width: 80px; height: 80px; border-radius: 20px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: white; box-shadow: 0 10px 20px rgba(106, 17, 203, 0.3);">🚀</div>
+    <h1 style="font-size: 2.2rem; margin: 0; background: var(--msg-me); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">GlobalChat</h1>
+    <p style="opacity: 0.6; font-size: 0.9rem;">By Sylvain Solofoniaina</p>
+    
+    <div id="avatarList" style="margin: 20px 0;">
+      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Mamy" class="avatar-choice selected" onclick="selectAv(this)">
+      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sary" class="avatar-choice" onclick="selectAv(this)">
+    </div>
+    
+    <input id="loginName" placeholder="Anaranao..." style="width: 85%; padding: 16px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); background: var(--glass); color: white; outline: none; text-align: center; font-size: 1rem;">
+    <button onclick="doLogin()" style="background: var(--msg-me); color: white; padding: 16px; border-radius: 15px; font-weight: bold; width: 85%; margin-top: 20px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">HIDITRA IZAO ➔</button>
+    
+    <div class="copyright">
+        © 2024 GlobalChat Pro. All Rights Reserved.<br>
+        Designed by <b>Sylvain Solofoniaina</b>
+    </div>
+  </div>
+
+  <div id="main" style="display:none; flex:1; flex-direction:column">
+    <div id="rooms" class="screen active-screen">
+      <header>
+        <b style="font-size: 1.4rem; letter-spacing: -0.5px;">Hafatra 💬</b>
+        <button onclick="toggleTheme()" style="font-size: 1.2rem;">🌓</button>
+      </header>
+      <div id="userList"></div>
+    </div>
+
+    <div id="chat" class="screen">
+      <header>
+        <button onclick="closeChat()" style="font-size: 1.6rem;">✕</button>
+        <div style="flex:1; margin-left:10px;">
+            <b id="activeChatName" style="display:block; font-size:1.1rem"></b>
+            <small style="color: #10b981; font-size: 0.7rem;">● Online</small>
+        </div>
+        <button onclick="alert('Antso feo ho avy tsy ho ela!')" style="font-size: 1.3rem;">📞</button>
+      </header>
+      <div id="messages"></div>
+      <div id="typingStatus"></div>
+      <div class="controls">
+        <button onclick="fileIn.click()" style="font-size: 1.6rem; color: #64748b;">⊕</button>
+        <input id="msgInput" placeholder="Hafatra..." oninput="sendTyping()" onkeydown="if(event.key==='Enter') sendMsg()">
+        <button onclick="sendMsg()" style="background: var(--primary); color: white; width: 45px; height: 45px; border-radius: 50%; font-size: 1.2rem;">➤</button>
+        <input type="file" id="fileIn" hidden accept="image/*" onchange="uploadPhoto(this)">
+      </div>
+    </div>
+
+    <div id="settings" class="screen">
+      <header><b>Profile 👤</b></header>
+      <div style="text-align:center; padding:40px 20px;">
+        <div style="position: relative; display: inline-block;">
+            <img id="myProfPic" style="width:130px; height:130px; border-radius:50%; border:5px solid #3b82f6;">
+            <div style="position: absolute; bottom: 10px; right: 10px; background: #10b981; width: 25px; height: 25px; border-radius: 50%; border: 3px solid var(--bg);"></div>
+        </div>
+        <h2 id="myProfName" style="margin: 15px 0 5px;"></h2>
+        <p style="opacity: 0.5; font-size: 0.8rem; margin-bottom: 30px;">Mpikambana GlobalChat</p>
+        
+        <div style="background: var(--glass); border-radius: 20px; padding: 20px; text-align: left; margin-bottom: 30px;">
+            <p style="margin: 0; font-size: 0.9rem;"><b>Auteur:</b> Sylvain Solofoniaina</p>
+            <p style="margin: 10px 0 0; font-size: 0.9rem;"><b>Version:</b> 2.0.1 Pro (Stable)</p>
+            <p style="margin: 10px 0 0; font-size: 0.9rem;"><b>Statut:</b> Voaaro (Encrypted)</p>
+        </div>
+
+        <button onclick="logout()" style="background:#ef4444; color:white; padding:15px 40px; border-radius:20px; font-weight: bold; width: 100%;">HIALA (LOGOUT)</button>
+        <p class="copyright">Copyright © 2024 Sylvain Solofoniaina</p>
+      </div>
+    </div>
+
+    <div class="nav">
+      <button id="nav-rooms" class="active" onclick="show('rooms')"><b>💬</b><span>Chats</span></button>
+      <button id="nav-settings" onclick="show('settings')"><b>👤</b><span>Me</span></button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyAJAy-RPWZiqrngfpOVBxsq9FSvms5hFGI",
+  authDomain: "lgbtq-pro.firebaseapp.com",
+  projectId: "lgbtq-pro",
+  storageBucket: "lgbtq-pro.firebasestorage.app",
+  messagingSenderId: "188046971429",
+  appId: "1:188046971429:web:b99215b46097c8ac8a65cc"
+});
+
+const db = firebase.firestore();
+const st = firebase.storage();
+let user = {name:"", avatar:""};
+let activeChatId = "";
+let unsubMsg = null;
+let unsubTyping = null;
+
+function $(i){return document.getElementById(i);}
+
+function selectAv(el){
+  document.querySelectorAll('.avatar-choice').forEach(a=>a.classList.remove('selected'));
+  el.classList.add('selected');
+  user.avatar = el.src;
+}
+
+async function doLogin(){
+  const n = $("loginName").value.trim();
+  if(!n) return alert("Ampidiro ny anaranao!");
+  user.name = n;
+  user.avatar = document.querySelector('.avatar-choice.selected').src;
+
+  await db.collection("users").doc(user.name).set({
+    name:user.name, avatar:user.avatar, online:true, lastSeen: Date.now()
+  },{merge:true});
+
+  localStorage.lgbtUser = JSON.stringify(user);
+  $("login").style.display="none";
+  $("main").style.display="flex";
+  loadUsers();
+}
+
+function loadUsers(){
+  db.collection("users").onSnapshot(s=>{
+    $("userList").innerHTML="";
+    s.forEach(d=>{
+      if(d.id !== user.name){
+        const u = d.data();
+        $("userList").innerHTML += `
+          <div class="item" onclick="openChat('${u.name}')">
+            <img src="${u.avatar}">
+            <div style="flex:1">
+               <b style="font-size:1.1rem">${u.name}</b><br>
+               <small style="opacity:0.6">${u.online ? '🟢 Mavitrika' : '⚪ Tsy eo'}</small>
+            </div>
+            <span style="opacity:0.3">➔</span>
+          </div>`;
+      }
+    });
+  });
+}
+
+<!DOCTYPE html>
+<html lang="mg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>GlobalChat Pro | Sylvain Solofoniaina</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #6a11cb;
+  --secondary: #2575fc;
+  --bg: #0f172a;
+  --glass: rgba(255,255,255,.08);
+  --text: #f8fafc;
+  --msg-me: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  --msg-other: #1e293b;
+}
+
+body.light-mode {
+  --bg: #f8fafc;
+  --glass: rgba(0,0,0,.04);
+  --text: #0f172a;
+  --msg-me: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  --msg-other: #f1f5f9;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; margin: 0; overscroll-behavior: none; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; }
+
+.app { width: 100%; max-width: 500px; height: 100dvh; display: flex; flex-direction: column; background: var(--bg); position: relative; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+
+header { padding: 15px; display: flex; align-items: center; justify-content: space-between; background: var(--glass); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 10; }
+
+.screen { flex: 1; display: none; flex-direction: column; overflow: hidden; }
+.active-screen { display: flex; }
+
+#messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth; }
+.msg-wrapper { max-width: 80%; display: flex; flex-direction: column; }
+.me { align-self: flex-end; }
+.other { align-self: flex-start; }
+
+.msg { padding: 12px 16px; border-radius: 20px; font-size: .95rem; line-height: 1.4; position: relative; }
+.me .msg { background: var(--msg-me); color: #fff; border-bottom-right-radius: 4px; }
+.other .msg { background: var(--msg-other); color: var(--text); border-bottom-left-radius: 4px; }
+
+.seen-status { font-size: .65rem; opacity: .6; margin-top: 4px; text-align: right; }
+#typingStatus { padding: 5px 20px; font-size: .75rem; color: #3b82f6; height: 25px; font-weight: 600; font-style: italic; }
+
+.controls { display: flex; gap: 10px; padding: 12px; background: var(--glass); backdrop-filter: blur(10px); align-items: center; }
+.controls input { flex: 1; padding: 12px 20px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); background: var(--bg); color: var(--text); outline: none; }
+
+button { background: none; border: none; color: var(--primary); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+.item { display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid var(--glass); cursor: pointer; transition: 0.2s; }
+.item:active { background: var(--glass); }
+.item img { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 2px solid var(--secondary); }
+
+.nav { display: flex; background: var(--glass); border-top: 1px solid rgba(255,255,255,0.05); padding-bottom: env(safe-area-inset-bottom); }
+.nav button { flex: 1; padding: 12px; font-size: .75rem; color: #64748b; flex-direction: column; gap: 4px; transition: 0.3s; }
+.nav button.active { color: #3b82f6; transform: translateY(-2px); }
+.nav b { font-size: 1.4rem; }
+
+.avatar-choice { width: 75px; height: 75px; border-radius: 50%; margin: 10px; border: 3px solid transparent; cursor: pointer; transition: 0.3s; }
+.avatar-choice.selected { border-color: #3b82f6; transform: scale(1.1); box-shadow: 0 0 15px #3b82f6; }
+
+.copyright { font-size: 0.7rem; opacity: 0.4; margin-top: 20px; text-align: center; width: 100%; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div id="login" class="screen active-screen" style="justify-content: center; align-items: center; text-align: center; padding: 20px;">
+    <div style="background: var(--msg-me); width: 80px; height: 80px; border-radius: 20px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: white; box-shadow: 0 10px 20px rgba(106, 17, 203, 0.3);">🚀</div>
+    <h1 style="font-size: 2.2rem; margin: 0; background: var(--msg-me); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">GlobalChat</h1>
+    <p style="opacity: 0.6; font-size: 0.9rem;">By Sylvain Solofoniaina</p>
+    
+    <div id="avatarList" style="margin: 20px 0;">
+      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Mamy" class="avatar-choice selected" onclick="selectAv(this)">
+      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sary" class="avatar-choice" onclick="selectAv(this)">
+    </div>
+    
+    <input id="loginName" placeholder="Anaranao..." style="width: 85%; padding: 16px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); background: var(--glass); color: white; outline: none; text-align: center; font-size: 1rem;">
+    <button onclick="doLogin()" style="background: var(--msg-me); color: white; padding: 16px; border-radius: 15px; font-weight: bold; width: 85%; margin-top: 20px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">HIDITRA IZAO ➔</button>
+    
+    <div class="copyright">
+        © 2024 GlobalChat Pro. All Rights Reserved.<br>
+        Designed by <b>Sylvain Solofoniaina</b>
+    </div>
+  </div>
+
+  <div id="main" style="display:none; flex:1; flex-direction:column">
+    <div id="rooms" class="screen active-screen">
+      <header>
+        <b style="font-size: 1.4rem; letter-spacing: -0.5px;">Hafatra 💬</b>
+        <button onclick="toggleTheme()" style="font-size: 1.2rem;">🌓</button>
+      </header>
+      <div id="userList"></div>
+    </div>
+
+    <div id="chat" class="screen">
+      <header>
+        <button onclick="closeChat()" style="font-size: 1.6rem;">✕</button>
+        <div style="flex:1; margin-left:10px;">
+            <b id="activeChatName" style="display:block; font-size:1.1rem"></b>
+            <small style="color: #10b981; font-size: 0.7rem;">● Online</small>
+        </div>
+        <button onclick="alert('Antso feo ho avy tsy ho ela!')" style="font-size: 1.3rem;">📞</button>
+      </header>
+      <div id="messages"></div>
+      <div id="typingStatus"></div>
+      <div class="controls">
+        <button onclick="fileIn.click()" style="font-size: 1.6rem; color: #64748b;">⊕</button>
+        <input id="msgInput" placeholder="Hafatra..." oninput="sendTyping()" onkeydown="if(event.key==='Enter') sendMsg()">
+        <button onclick="sendMsg()" style="background: var(--primary); color: white; width: 45px; height: 45px; border-radius: 50%; font-size: 1.2rem;">➤</button>
+        <input type="file" id="fileIn" hidden accept="image/*" onchange="uploadPhoto(this)">
+      </div>
+    </div>
+
+    <div id="settings" class="screen">
+      <header><b>Profile 👤</b></header>
+      <div style="text-align:center; padding:40px 20px;">
+        <div style="position: relative; display: inline-block;">
+            <img id="myProfPic" style="width:130px; height:130px; border-radius:50%; border:5px solid #3b82f6;">
+            <div style="position: absolute; bottom: 10px; right: 10px; background: #10b981; width: 25px; height: 25px; border-radius: 50%; border: 3px solid var(--bg);"></div>
+        </div>
+        <h2 id="myProfName" style="margin: 15px 0 5px;"></h2>
+        <p style="opacity: 0.5; font-size: 0.8rem; margin-bottom: 30px;">Mpikambana GlobalChat</p>
+        
+        <div style="background: var(--glass); border-radius: 20px; padding: 20px; text-align: left; margin-bottom: 30px;">
+            <p style="margin: 0; font-size: 0.9rem;"><b>Auteur:</b> Sylvain Solofoniaina</p>
+            <p style="margin: 10px 0 0; font-size: 0.9rem;"><b>Version:</b> 2.0.1 Pro (Stable)</p>
+            <p style="margin: 10px 0 0; font-size: 0.9rem;"><b>Statut:</b> Voaaro (Encrypted)</p>
+        </div>
+
+        <button onclick="logout()" style="background:#ef4444; color:white; padding:15px 40px; border-radius:20px; font-weight: bold; width: 100%;">HIALA (LOGOUT)</button>
+        <p class="copyright">Copyright © 2024 Sylvain Solofoniaina</p>
+      </div>
+    </div>
+
+    <div class="nav">
+      <button id="nav-rooms" class="active" onclick="show('rooms')"><b>💬</b><span>Chats</span></button>
+      <button id="nav-settings" onclick="show('settings')"><b>👤</b><span>Me</span></button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyAJAy-RPWZiqrngfpOVBxsq9FSvms5hFGI",
+  authDomain: "lgbtq-pro.firebaseapp.com",
+  projectId: "lgbtq-pro",
+  storageBucket: "lgbtq-pro.firebasestorage.app",
+  messagingSenderId: "188046971429",
+  appId: "1:188046971429:web:b99215b46097c8ac8a65cc"
+});
+
+const db = firebase.firestore();
+const st = firebase.storage();
+let user = {name:"", avatar:""};
+let activeChatId = "";
+let unsubMsg = null;
+let unsubTyping = null;
+
+function $(i){return document.getElementById(i);}
+
+function selectAv(el){
+  document.querySelectorAll('.avatar-choice').forEach(a=>a.classList.remove('selected'));
+  el.classList.add('selected');
+  user.avatar = el.src;
+}
+
+async function doLogin(){
+  const n = $("loginName").value.trim();
+  if(!n) return alert("Ampidiro ny anaranao!");
+  user.name = n;
+  user.avatar = document.querySelector('.avatar-choice.selected').src;
+
+  await db.collection("users").doc(user.name).set({
+    name:user.name, avatar:user.avatar, online:true, lastSeen: Date.now()
+  },{merge:true});
+
+  localStorage.lgbtUser = JSON.stringify(user);
+  $("login").style.display="none";
+  $("main").style.display="flex";
+  loadUsers();
+}
+
+function loadUsers(){
+  db.collection("users").onSnapshot(s=>{
+    $("userList").innerHTML="";
+    s.forEach(d=>{
+      if(d.id !== user.name){
+        const u = d.data();
+        $("userList").innerHTML += `
+          <div class="item" onclick="openChat('${u.name}')">
+            <img src="${u.avatar}">
+            <div style="flex:1">
+               <b style="font-size:1.1rem">${u.name}</b><br>
+               <small style="opacity:0.6">${u.online ? '🟢 Mavitrika' : '⚪ Tsy eo'}</small>
+            </div>
+            <span style="opacity:0.3">➔</span>
+          </div>`;
+      }
+    });
+  });
+}
+
+function openChat(otherName){
+  activeChatId = [user.name, otherName].sort().join("_");
+  $("activeChatName").innerText = otherName;
+  show('chat');
+
+  if(unsubMsg) unsubMsg();
+  unsubMsg = db.collection("chats").doc(activeChatId).collection("messages").orderBy("ts")
+    .onSnapshot(s => {
+      $("messages").innerHTML = "";
+      s.forEach(d => {
+        const m = d.data();
+        const isMe = m.sender === user.name;
+        if(!isMe && m.status === 'sent') d.ref.update({status:'seen'});
+
+        $("messages").innerHTML += `
+          <div class="msg-wrapper ${isMe?'me':'other'}" onclick="deleteMsg('${d.id}', ${isMe})">
+            <div class="msg">${m.text || `<img src="${m.img}" style="max-width:200px; border-radius:12px">`}</div>
+            <div class="seen-status">${isMe ? (m.status === 'seen' ? '✔✔ Vue' : '✔ Nalefa') : ''}</div>
+          </div>`;
+      });
+      $("messages").scrollTop = $("messages").scrollHeight;
+    });
+
+  if(unsubTyping) unsubTyping();
+  unsubTyping = db.collection("chats").doc(activeChatId).onSnapshot(d => {
+    if(d.exists()){
+      const data = d.data();
+      $("typingStatus").innerText = data[`typing_${otherName}`] ? otherName + " manoratra..." : "";
+    }
+  });
+}
+
+function sendTyping(){
+  const isTyping = $("msgInput").value.trim().length > 0;
+  db.collection("chats").doc(activeChatId).set({
+    [`typing_${user.name}`]: isTyping
+  }, {merge:true});
+}
+
+function sendMsg(){
+  const val = $("msgInput").value.trim();
+  if(!val) return;
+  db.collection("chats").doc(activeChatId).collection("messages").add({
+    sender: user.name, text: val, ts: Date.now(), status: 'sent'
+  });
+  $("msgInput").value = "";
+  db.collection("chats").doc(activeChatId).set({ [`typing_${user.name}`]: false }, {merge:true});
+}
+
+async function uploadPhoto(i){
+  const f = i.files[0];
+  if(!f) return;
+  const r = st.ref("chats/"+Date.now()+f.name);
+  await r.put(f);
+  const url = await r.getDownloadURL();
+  db.collection("chats").doc(activeChatId).collection("messages").add({
+    sender: user.name, img: url, ts: Date.now(), status: 'sent'
+  });
+}
+
+function deleteMsg(id, isMe) {
+    if(!isMe) return;
+    if(confirm("Hamafa ity hafatra ity ho an'ny rehetra?")) {
+        db.collection("chats").doc(activeChatId).collection("messages").doc(id).delete();
+    }
+}
+
+function closeChat(){
+  if(activeChatId) db.collection("chats").doc(activeChatId).set({ [`typing_${user.name}`]: false }, {merge:true});
+  show('rooms');
+}
+
+function toggleTheme(){ document.body.classList.toggle('light-mode'); }
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+  $(id).classList.add('active-screen');
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  if($('nav-'+id)) $('nav-'+id).classList.add('active');
+  if(id === 'settings'){
+    $("myProfPic").src = user.avatar;
+    $("myProfName").innerText = user.name;
+  }
+}
+
+function logout(){
+  if(user.name) db.collection("users").doc(user.name).update({online:false});
+  localStorage.clear();
+  location.reload();
+}
+
+window.onload=()=>{
+  if(localStorage.lgbtUser){
+    user = JSON.parse(localStorage.lgbtUser);
+    $("login").style.display="none";
+    $("main").style.display="flex";
+    loadUsers();
+    db.collection("users").doc(user.name).update({online:true});
+  }
+}
+</script>
+</body>
+</html>
