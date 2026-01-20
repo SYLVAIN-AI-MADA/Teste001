@@ -3,117 +3,106 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>GlobalChat Pro | Sylvain Solofoniaina</title>
+<title>GlobalChat Pro | Multimedia</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
     --messenger-blue: #0084ff;
-    --bg-dark: #000000;
-    --bg-light: #ffffff;
+    --bg-main: #0b0b0b;
+    --text-main: #ffffff;
     --bubble-me: #0084ff;
-    --bubble-other: #3e4042;
-    --text-main: #e4e6eb;
-    --glass: rgba(255, 255, 255, 0.1);
+    --bubble-other: #242526;
+    --glass: rgba(255, 255, 255, 0.08);
 }
 
-body.light-mode {
-    --bg-dark: #ffffff;
-    --text-main: #050505;
-    --bubble-other: #e4e6eb;
-}
+body.light-mode { --bg-main: #ffffff; --text-main: #050505; --bubble-other: #e4e6eb; --glass: rgba(0, 0, 0, 0.05); }
+body.lgbt-mode { --bg-main: #12011a; --bubble-me: linear-gradient(45deg, #ff0000, #ff8c00, #ffeb00, #4eb120, #004dff, #750787); --bubble-other: #2d134d; }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body, html { height: 100%; margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-main); overflow: hidden; }
+body, html { height: 100%; margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-main); color: var(--text-main); transition: 0.3s; }
 
 .app { width: 100%; max-width: 500px; height: 100dvh; display: flex; flex-direction: column; margin: auto; position: relative; border-left: 1px solid var(--glass); border-right: 1px solid var(--glass); }
 
-/* SCREENS */
-.screen { flex: 1; display: none; flex-direction: column; height: 100%; overflow: hidden; }
-.active { display: flex; }
+/* HEADER STYLE */
+header { padding: 15px; display: flex; align-items: center; justify-content: space-between; background: var(--bg-main); border-bottom: 1px solid var(--glass); z-index: 100; }
+.header-profile { display: flex; align-items: center; gap: 10px; }
+.header-profile img { width: 35px; height: 35px; border-radius: 50%; }
 
-/* HEADER */
-header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--glass); background: var(--bg-dark); z-index: 10; }
-header b { font-size: 1.2rem; }
+/* MESSAGE AREA */
+#messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; scroll-behavior: smooth; }
 
-/* USER LIST */
-#userList { flex: 1; overflow-y: auto; padding: 10px; }
-.user-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; cursor: pointer; transition: 0.2s; }
-.user-item:active { background: var(--glass); }
-.user-avatar { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; background: #333; }
-.status-dot { width: 12px; height: 12px; border-radius: 50%; background: #31a24c; border: 2px solid var(--bg-dark); margin-left: -25px; margin-top: 35px; }
+/* MESSENGER STYLE ALIGNMENT */
+.msg-wrapper { display: flex; width: 100%; margin-bottom: 8px; flex-direction: column; }
+.msg-wrapper.me { align-items: flex-end; }
+.msg-wrapper.other { align-items: flex-start; }
 
-/* CHAT BOX */
-#messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 4px; }
-.msg-row { display: flex; flex-direction: column; max-width: 75%; position: relative; margin-bottom: 2px; }
-.msg-row.me { align-self: flex-end; align-items: flex-end; }
-.msg-row.other { align-self: flex-start; align-items: flex-start; }
-
-.bubble { padding: 8px 14px; border-radius: 18px; font-size: 0.95rem; line-height: 1.3; word-wrap: break-word; }
+.bubble { max-width: 75%; padding: 10px 14px; font-size: 0.95rem; line-height: 1.4; border-radius: 18px; position: relative; }
 .me .bubble { background: var(--bubble-me); color: white; border-bottom-right-radius: 4px; }
 .other .bubble { background: var(--bubble-other); color: var(--text-main); border-bottom-left-radius: 4px; }
 
-.msg-info { font-size: 0.65rem; opacity: 0.6; margin-top: 2px; }
+/* MEDIA CONTENT */
+.msg-media { max-width: 250px; border-radius: 12px; margin-top: 5px; cursor: pointer; border: 1px solid var(--glass); }
+video.msg-media { background: #000; }
 
-/* INPUT AREA */
-.input-area { padding: 10px; display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--glass); }
-.input-area input { flex: 1; padding: 10px 16px; border-radius: 20px; border: none; background: var(--bubble-other); color: var(--text-main); outline: none; }
-.btn-send { background: none; border: none; color: var(--messenger-blue); font-size: 1.5rem; cursor: pointer; }
+/* SEEN STATUS */
+.seen-status { height: 16px; margin-top: 2px; }
+.seen-avatar { width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--bg-main); }
 
-/* CALL OVERLAY */
-#callScreen { position: absolute; inset: 0; background: #000; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
-.call-img { width: 120px; height: 120px; border-radius: 50%; border: 3px solid white; margin-bottom: 20px; animation: pulse 1.5s infinite; }
-@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.4); } 70% { box-shadow: 0 0 0 20px rgba(255,255,255,0); } 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); } }
+/* INPUT BAR */
+.input-bar { padding: 12px; display: flex; align-items: center; gap: 10px; background: var(--bg-main); border-top: 1px solid var(--glass); }
+.input-bar input { flex: 1; padding: 10px 16px; border-radius: 20px; border: none; background: var(--bubble-other); color: var(--text-main); outline: none; }
 
-/* NAVIGATION */
-.bottom-nav { display: flex; border-top: 1px solid var(--glass); padding: 5px 0; background: var(--bg-dark); }
-.nav-item { flex: 1; text-align: center; padding: 10px; font-size: 0.75rem; cursor: pointer; opacity: 0.6; }
-.nav-item.active { opacity: 1; color: var(--messenger-blue); }
+.media-btns { display: flex; gap: 12px; color: var(--messenger-blue); font-size: 1.3rem; cursor: pointer; }
+
+/* THEME PICKER */
+.theme-dot { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid white; }
+
+.hidden { display: none !important; }
 </style>
 </head>
 <body>
 
 <div class="app">
-    <div id="login" class="screen active" style="justify-content:center; align-items:center; padding:40px;">
-        <h1 style="color:var(--messenger-blue); font-size: 2.5rem; margin-bottom: 5px;">GlobalChat</h1>
-        <p style="opacity:0.5; margin-bottom:30px;">By Sylvain Solofoniaina</p>
-        <input id="userName" placeholder="Anaranao..." style="width:100%; padding:15px; border-radius:15px; border:1px solid var(--glass); background:var(--bubble-other); color:white; text-align:center; font-size:1rem;">
-        <button onclick="login()" style="width:100%; padding:15px; border-radius:15px; border:none; background:var(--messenger-blue); color:white; font-weight:bold; margin-top:15px; cursor:pointer;">HIDITRA</button>
-        <p style="font-size: 0.7rem; opacity: 0.3; margin-top: 40px;">© 2026 Copyright Reserved</p>
+    <div id="loginPage" style="padding:40px; text-align:center; flex:1; display:flex; flex-direction:column; justify-content:center;">
+        <h1 style="color:var(--messenger-blue); font-size: 2.5rem;">GlobalChat</h1>
+        <p style="opacity: 0.6;">Dingan'ny multimedia sy interface vaovao</p>
+        <input id="userName" placeholder="Anaranao..." style="width:100%; padding:15px; border-radius:12px; border:1px solid var(--glass); background:var(--bubble-other); color:var(--text-main); margin-bottom: 10px;">
+        <button onclick="login()" style="width:100%; padding:15px; border-radius:12px; border:none; background:var(--messenger-blue); color:white; font-weight:bold; cursor:pointer;">HIDITRA</button>
     </div>
 
-    <div id="main" class="screen">
-        <div id="rooms" class="screen active">
-            <header>
-                <b>Chats</b>
-                <button onclick="document.body.classList.toggle('light-mode')" style="background:none; border:none; font-size:1.3rem;">🌓</button>
-            </header>
-            <div id="userList"></div>
-            <div class="bottom-nav">
-                <div class="nav-item active">💬<br>Chats</div>
-                <div class="nav-item" onclick="logout()">👤<br>Hiala</div>
+    <div id="mainUI" class="hidden" style="height:100dvh; display:flex; flex-direction:column;">
+        <header id="listHeader">
+            <b>GlobalChat</b>
+            <div style="display:flex; gap:10px;">
+                <div class="theme-dot" style="background:#000" onclick="setTheme('dark')"></div>
+                <div class="theme-dot" style="background:#ddd" onclick="setTheme('light')"></div>
+                <div class="theme-dot" style="background:linear-gradient(45deg, red, violet)" onclick="setTheme('lgbt')"></div>
             </div>
-        </div>
+        </header>
 
-        <div id="chat" class="screen">
+        <div id="userList" style="flex:1; overflow-y:auto;"></div>
+
+        <div id="chatBox" class="hidden" style="position:absolute; inset:0; background:var(--bg-main); display:flex; flex-direction:column; z-index:200;">
             <header>
-                <button onclick="closeChat()" style="background:none; border:none; color:var(--messenger-blue); font-size:1.5rem;">✕</button>
-                <b id="chatTitle" style="flex:1; margin-left:10px;">Anarana</b>
-                <button onclick="makeCall()" style="background:none; border:none; color:var(--messenger-blue); font-size:1.3rem;">📞</button>
+                <div class="header-profile">
+                    <button onclick="closeChat()" style="background:none; border:none; color:var(--messenger-blue); font-size:1.5rem; cursor:pointer;">✕</button>
+                    <img id="chatAvatar" src="">
+                    <b id="chatTitle">Name</b>
+                </div>
+                <div style="color:var(--messenger-blue); cursor:pointer;">📞 &nbsp; 🎥</div>
             </header>
+            
             <div id="messages"></div>
-            <div id="typingInfo" style="padding: 2px 15px; font-size: 0.7rem; color: var(--messenger-blue); height: 15px;"></div>
-            <div class="input-area">
-                <input id="msgInput" placeholder="Hafatra..." oninput="isTyping()" onkeydown="if(event.key==='Enter') send()">
-                <button class="btn-send" onclick="send()">➤</button>
+
+            <div class="input-bar">
+                <div class="media-btns">
+                    <span onclick="promptMedia('image')">🖼️</span>
+                    <span onclick="promptMedia('video')">📹</span>
+                </div>
+                <input id="msgInput" placeholder="Hafatra..." onkeydown="if(event.key==='Enter') send('text')">
+                <div class="media-btns" onclick="send('text')">➤</div>
             </div>
         </div>
-    </div>
-
-    <div id="callScreen">
-        <img id="callImg" class="call-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Call">
-        <h2 id="callName" style="color:white;">Miantso...</h2>
-        <p id="callStatus" style="color:white; opacity:0.7;">Miantso...</p>
-        <button onclick="endCall()" style="background:#ff3b30; color:white; padding:15px 40px; border-radius:30px; border:none; margin-top:40px; font-weight:bold;">HAFESANA</button>
     </div>
 </div>
 
@@ -121,7 +110,6 @@ header b { font-size: 1.2rem; }
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <script>
-// CONFIG FIREBASE
 const firebaseConfig = {
     apiKey: "AIzaSyAJAy-RPWZiqrngfpOVBxsq9FSvms5hFGI",
     authDomain: "lgbtq-pro.firebaseapp.com",
@@ -137,16 +125,17 @@ let myName = "";
 let activeChat = "";
 let unsub = null;
 
+function setTheme(t) { document.body.className = t + "-mode"; }
+
 function login() {
     const n = document.getElementById("userName").value.trim();
     if(!n) return;
     myName = n;
     localStorage.chatUser = n;
-    db.collection("users").doc(n).set({ name: n, online: true, last: Date.now() }, {merge: true});
-    document.getElementById("login").classList.remove("active");
-    document.getElementById("main").classList.add("active");
+    db.collection("users").doc(n).set({ name: n, online: true }, {merge:true});
+    document.getElementById("loginPage").classList.add("hidden");
+    document.getElementById("mainUI").classList.remove("hidden");
     loadUsers();
-    listenCalls();
 }
 
 function loadUsers() {
@@ -155,13 +144,11 @@ function loadUsers() {
         list.innerHTML = "";
         snap.forEach(doc => {
             if(doc.id !== myName) {
-                const u = doc.data();
                 list.innerHTML += `
-                    <div class="user-item" onclick="openChat('${u.name}')">
-                        <img class="user-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=${u.name}">
-                        <div class="status-dot" style="background:${u.online?'#31a24c':'#888'}"></div>
-                        <div style="flex:1"><b>${u.name}</b><br><small style="opacity:0.5">${u.online?'Online':'Offline'}</small></div>
-                    </div>`;
+                <div onclick="openChat('${doc.id}')" style="display:flex; align-items:center; padding:15px; gap:12px; cursor:pointer; border-bottom: 1px solid var(--glass);">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${doc.id}" style="width:55px; height:55px; border-radius:50%">
+                    <div style="flex:1"><b>${doc.id}</b><br><small style="opacity:0.5">Tsindrio hiresahana...</small></div>
+                </div>`;
             }
         });
     });
@@ -170,98 +157,66 @@ function loadUsers() {
 function openChat(other) {
     activeChat = [myName, other].sort().join("_");
     document.getElementById("chatTitle").innerText = other;
-    document.getElementById("rooms").classList.remove("active");
-    document.getElementById("chat").classList.add("active");
+    document.getElementById("chatAvatar").src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${other}`;
+    document.getElementById("chatBox").classList.remove("hidden");
 
     if(unsub) unsub();
     unsub = db.collection("private_chats").doc(activeChat).collection("messages")
+        .orderBy("ts", "asc")
         .onSnapshot(snap => {
-            let data = [];
-            snap.forEach(d => data.push({...d.data(), id: d.id}));
-            
-            // MANUAL SORT BY TIMESTAMP
-            data.sort((a, b) => (a.ts || 0) - (b.ts || 0));
-
             const box = document.getElementById("messages");
             box.innerHTML = "";
+            let data = [];
+            snap.forEach(d => data.push({...d.data(), id: d.id}));
+
+            const lastSeen = [...data].reverse().find(m => m.sender === myName && m.seen);
+
             data.forEach(m => {
                 const isMe = m.sender === myName;
-                const ora = m.ts ? new Date(m.ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : "...";
-                box.innerHTML += `
-                    <div class="msg-row ${isMe?'me':'other'}">
-                        <div class="bubble">${m.text}</div>
-                        <div class="msg-info">${ora} ${isMe ? (m.seen?'✔✔':'✔') : ''}</div>
+                let content = "";
+                
+                if(m.type === 'text') content = `<div class="bubble">${m.text}</div>`;
+                else if(m.type === 'image') content = `<img src="${m.url}" class="msg-media">`;
+                else if(m.type === 'video') content = `<video src="${m.url}" class="msg-media" controls></video>`;
+
+                let html = `
+                    <div class="msg-wrapper ${isMe?'me':'other'}">
+                        ${content}
+                        ${isMe && lastSeen && m.id === lastSeen.id ? `
+                            <div class="seen-status">
+                                <img class="seen-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=${other}">
+                            </div>
+                        ` : ''}
                     </div>`;
+                box.innerHTML += html;
+
                 if(!isMe && !m.seen) db.collection("private_chats").doc(activeChat).collection("messages").doc(m.id).update({seen:true});
             });
             box.scrollTop = box.scrollHeight;
         });
-
-    // Listen Typing
-    db.collection("private_chats").doc(activeChat).onSnapshot(d => {
-        if(d.exists()) {
-            document.getElementById("typingInfo").innerText = d.data()["typ_"+other] ? other + " manoratra..." : "";
-        }
-    });
 }
 
-function send() {
-    const val = document.getElementById("msgInput").value.trim();
-    if(!val) return;
-    db.collection("private_chats").doc(activeChat).collection("messages").add({
-        sender: myName,
-        text: val,
-        ts: Date.now(),
-        seen: false
-    });
-    document.getElementById("msgInput").value = "";
-    db.collection("private_chats").doc(activeChat).set({["typ_"+myName]: false}, {merge:true});
+function send(type, url = "") {
+    let msgData = { sender: myName, ts: Date.now(), seen: false, type: type };
+    
+    if(type === 'text') {
+        const input = document.getElementById("msgInput");
+        if(!input.value.trim()) return;
+        msgData.text = input.value;
+        input.value = "";
+    } else {
+        msgData.url = url;
+    }
+
+    db.collection("private_chats").doc(activeChat).collection("messages").add(msgData);
 }
 
-function isTyping() {
-    db.collection("private_chats").doc(activeChat).set({
-        ["typ_"+myName]: document.getElementById("msgInput").value.length > 0
-    }, {merge:true});
+function promptMedia(type) {
+    const url = prompt(`Alefaso ny URL-n'ny ${type} (ohatra: https://...):`);
+    if(url) send(type, url);
 }
 
-// CALL FUNCTION
-function makeCall() {
-    const other = document.getElementById("chatTitle").innerText;
-    document.getElementById("callName").innerText = other;
-    document.getElementById("callImg").src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${other}`;
-    document.getElementById("callScreen").style.display = "flex";
-    db.collection("calls").doc(other).set({ caller: myName, status: "ringing" });
-}
-
-function listenCalls() {
-    db.collection("calls").doc(myName).onSnapshot(d => {
-        if(d.exists() && d.data().status === "ringing") {
-            if(confirm("Miantso i " + d.data().caller + ". Handray?")) {
-                alert("Mifandray ny feo...");
-                db.collection("calls").doc(myName).delete();
-            } else {
-                db.collection("calls").doc(myName).delete();
-            }
-        }
-    });
-}
-
-function endCall() {
-    document.getElementById("callScreen").style.display = "none";
-    const other = document.getElementById("chatTitle").innerText;
-    db.collection("calls").doc(other).delete();
-}
-
-function closeChat() {
-    document.getElementById("chat").classList.remove("active");
-    document.getElementById("rooms").classList.add("active");
-}
-
-function logout() {
-    db.collection("users").doc(myName).update({online: false});
-    localStorage.clear();
-    location.reload();
-}
+function closeChat() { document.getElementById("chatBox").classList.add("hidden"); }
 
 window.onload = () => { if(localStorage.chatUser) { document.getElementById("userName").value = localStorage.chatUser; login(); } }
 </script>
