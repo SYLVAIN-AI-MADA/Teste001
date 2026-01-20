@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>GlobalChat Pro | Sylvain Solofoniaina</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root {
   --primary: #6a11cb;
@@ -25,116 +25,95 @@ body.light-mode {
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; margin: 0; overscroll-behavior: none; }
-body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; }
+html, body { height: 100%; margin: 0; overscroll-behavior: none; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
 
-.app { width: 100%; max-width: 500px; height: 100dvh; display: flex; flex-direction: column; background: var(--bg); position: relative; }
+.app { width: 100%; max-width: 500px; height: 100dvh; display: flex; flex-direction: column; margin: auto; background: var(--bg); position: relative; }
 
-header { padding: 15px; display: flex; align-items: center; justify-content: space-between; background: var(--glass); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 10; }
+header { padding: 15px; display: flex; align-items: center; gap: 10px; background: var(--glass); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 10; }
 
 .screen { flex: 1; display: none; flex-direction: column; overflow: hidden; }
 .active-screen { display: flex; }
 
-#messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-.msg-wrapper { max-width: 80%; display: flex; flex-direction: column; }
+#messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
+.msg-wrapper { max-width: 85%; display: flex; flex-direction: column; margin-bottom: 5px; }
 .me { align-self: flex-end; }
 .other { align-self: flex-start; }
 
-.msg { padding: 12px 16px; border-radius: 20px; font-size: .95rem; line-height: 1.4; position: relative; }
+.msg { padding: 10px 14px; border-radius: 18px; font-size: .95rem; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 .me .msg { background: var(--msg-me); color: #fff; border-bottom-right-radius: 4px; }
 .other .msg { background: var(--msg-other); color: var(--text); border-bottom-left-radius: 4px; }
 
-.time { font-size: 0.6rem; opacity: 0.5; margin-top: 2px; }
-.me .time { text-align: right; }
+.time-box { font-size: 0.65rem; opacity: 0.6; margin-top: 3px; display: flex; align-items: center; gap: 4px; }
+.me .time-box { justify-content: flex-end; }
 
-.seen-status { font-size: .65rem; opacity: .8; color: #3b82f6; font-weight: bold; }
-#typingStatus { padding: 5px 20px; font-size: .75rem; color: #3b82f6; height: 25px; font-weight: 600; font-style: italic; }
+#typingStatus { padding: 5px 20px; font-size: .75rem; color: #3b82f6; height: 25px; font-weight: 600; }
 
-.controls { display: flex; gap: 10px; padding: 12px; background: var(--glass); backdrop-filter: blur(10px); }
-.controls input { flex: 1; padding: 12px 20px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); background: var(--bg); color: var(--text); outline: none; }
-
-button { background: none; border: none; color: var(--primary); cursor: pointer; }
-
-.item { display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid var(--glass); cursor: pointer; }
-.item img { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 2px solid var(--secondary); }
+.controls { display: flex; gap: 8px; padding: 12px; background: var(--glass); }
+.controls input { flex: 1; padding: 12px 18px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); background: var(--bg); color: var(--text); outline: none; }
 
 .nav { display: flex; background: var(--glass); border-top: 1px solid rgba(255,255,255,0.05); }
-.nav button { flex: 1; padding: 12px; font-size: .75rem; color: #64748b; flex-direction: column; gap: 4px; }
+.nav button { flex: 1; padding: 15px; font-size: .75rem; color: #64748b; border: none; background: none; display: flex; flex-direction: column; align-items: center; }
 .nav button.active { color: #3b82f6; }
 
-.avatar-choice { width: 75px; height: 75px; border-radius: 50%; margin: 10px; border: 3px solid transparent; cursor: pointer; }
-.avatar-choice.selected { border-color: #3b82f6; transform: scale(1.1); }
+/* CALL OVERLAY */
+#callOverlay { position: absolute; inset: 0; background: radial-gradient(circle, #2575fc, #0f172a); display: none; z-index: 100; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.call-avatar { width: 120px; height: 120px; border-radius: 50%; border: 4px solid white; margin-bottom: 20px; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0.7); } 70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(255,255,255,0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0); } }
 
-.copyright { font-size: 0.7rem; opacity: 0.4; margin-top: 20px; text-align: center; }
+.btn-call { padding: 15px 30px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; margin: 10px; }
 </style>
 </head>
 <body>
 
 <div class="app">
-  <div id="login" class="screen active-screen" style="justify-content: center; align-items: center; text-align: center; padding: 20px;">
-    <div style="font-size: 3rem; margin-bottom: 10px;">🛡️</div>
-    <h1 style="font-size: 2.2rem; background: var(--msg-me); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; margin:0">GlobalChat</h1>
-    <p style="opacity: 0.6; margin-bottom: 20px;">Secure Private Messaging</p>
-    
-    <div id="avatarList">
-      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Mamy" class="avatar-choice selected" onclick="selectAv(this)">
-      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sary" class="avatar-choice" onclick="selectAv(this)">
-      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Koto" class="avatar-choice" onclick="selectAv(this)">
-    </div>
-    
-    <input id="loginName" placeholder="Anaranao..." style="width: 85%; padding: 16px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); background: var(--glass); color: white; outline: none; text-align: center; margin-top: 20px;">
-    <button onclick="doLogin()" style="background: var(--msg-me); color: white; padding: 16px; border-radius: 15px; font-weight: bold; width: 85%; margin-top: 20px; border: none;">HIDITRA ➔</button>
-    <div class="copyright">Developed by Sylvain Solofoniaina<br>© 2026 Pro Version</div>
-  </div>
-
-  <div id="main" style="display:none; flex:1; flex-direction:column">
-    <div id="rooms" class="screen active-screen">
-      <header><b>Hafatra 💬</b><button onclick="toggleTheme()">🌓</button></header>
-      <div id="userList" style="flex:1; overflow-y:auto"></div>
+    <div id="login" class="screen active-screen" style="justify-content:center; align-items:center; padding:30px;">
+        <h1 style="background:var(--msg-me); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2.5rem; margin:0">GlobalChat</h1>
+        <p style="opacity:0.6">By Sylvain Solofoniaina</p>
+        <input id="loginName" placeholder="Anaranao..." style="width:100%; padding:15px; border-radius:15px; border:1px solid rgba(255,255,255,0.1); background:var(--glass); color:white; margin-top:20px; text-align:center;">
+        <button onclick="doLogin()" style="width:100%; background:var(--primary); color:white; padding:15px; border-radius:15px; border:none; margin-top:15px; font-weight:bold;">HIDITRA ➔</button>
     </div>
 
-    <div id="chat" class="screen">
-      <header>
-        <button onclick="closeChat()">✕</button>
-        <b id="activeChatName"></b>
-        <button onclick="alert('Antso feo ho avy...')">📞</button>
-      </header>
-      <div id="messages"></div>
-      <div id="typingStatus"></div>
-      <div class="controls">
-        <button onclick="fileIn.click()">⊕</button>
-        <input id="msgInput" placeholder="Manorata hafatra..." oninput="sendTyping()" onkeydown="if(event.key==='Enter') sendMsg()">
-        <button onclick="sendMsg()" style="background: var(--primary); color: white; width: 40px; height: 40px; border-radius: 50%;">➤</button>
-        <input type="file" id="fileIn" hidden accept="image/*" onchange="uploadPhoto(this)">
-      </div>
-    </div>
-
-    <div id="settings" class="screen">
-      <header><b>Profile 👤</b></header>
-      <div style="text-align:center; padding:40px 20px;">
-        <img id="myProfPic" style="width:120px; height:120px; border-radius:50%; border:4px solid #3b82f6;">
-        <h2 id="myProfName" style="margin-top:15px"></h2>
-        <div style="background: var(--glass); border-radius: 15px; padding: 15px; margin: 20px 0; text-align: left;">
-            <p style="margin:0; font-size:0.8rem"><b>Auteur:</b> Sylvain Solofoniaina</p>
-            <p style="margin:5px 0 0; font-size:0.8rem"><b>Statut:</b> Voaaro (Encrypted)</p>
+    <div id="main" style="display:none; flex:1; flex-direction:column">
+        <div id="rooms" class="screen active-screen">
+            <header><b>Hafatra 💬</b><button onclick="document.body.classList.toggle('light-mode')" style="background:none; border:none; font-size:1.2rem; color:var(--text)">🌓</button></header>
+            <div id="userList" style="flex:1; overflow-y:auto"></div>
         </div>
-        <button onclick="logout()" style="background:#ef4444; color:white; padding:15px; border-radius:15px; width:100%; border:none; font-weight:bold;">HIALA (LOGOUT)</button>
-      </div>
+
+        <div id="chat" class="screen">
+            <header>
+                <button onclick="closeChat()" style="background:none; border:none; color:var(--text); font-size:1.5rem">✕</button>
+                <b id="activeChatName" style="flex:1"></b>
+                <button onclick="startCall()" style="background:none; border:none; color:var(--secondary); font-size:1.4rem">📞</button>
+            </header>
+            <div id="messages"></div>
+            <div id="typingStatus"></div>
+            <div class="controls">
+                <input id="msgInput" placeholder="Hafatra..." oninput="sendTyping()" onkeydown="if(event.key==='Enter') sendMsg()">
+                <button onclick="sendMsg()" style="background:var(--primary); color:white; width:45px; height:45px; border-radius:50%; border:none;">➤</button>
+            </div>
+        </div>
+
+        <div class="nav">
+            <button id="nav-rooms" class="active" onclick="show('rooms')"><span>💬</span>Chats</button>
+            <button onclick="logout()"><span>👤</span>Hiala</button>
+        </div>
     </div>
 
-    <div class="nav">
-      <button id="nav-rooms" class="active" onclick="show('rooms')"><b>💬</b>Chats</button>
-      <button id="nav-settings" onclick="show('settings')"><b>👤</b>Profile</button>
+    <div id="callOverlay">
+        <img id="callUserImg" class="call-avatar" src="">
+        <h2 id="callUserName" style="color:white; margin:0"></h2>
+        <p style="color:white; opacity:0.8" id="callStatus">Miantso...</p>
+        <div style="margin-top:50px">
+            <button class="btn-call" style="background:#ef4444; color:white;" onclick="endCall()">HAFESANA</button>
+        </div>
     </div>
-  </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
 <script>
-// AMPIFIDIRO ETO NY CONFIG FIREBASE-NAO
+// CONFIG FIREBASE (Ampiasao ny anao foana)
 const firebaseConfig = {
   apiKey: "AIzaSyAJAy-RPWZiqrngfpOVBxsq9FSvms5hFGI",
   authDomain: "lgbtq-pro.firebaseapp.com",
@@ -146,157 +125,134 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const st = firebase.storage();
-
-let user = {name:"", avatar:""};
+let user = {name:""};
 let activeChatId = "";
 let unsubMsg = null;
 let unsubTyping = null;
 
 function $(i){return document.getElementById(i);}
 
-function selectAv(el){
-  document.querySelectorAll('.avatar-choice').forEach(a=>a.classList.remove('selected'));
-  el.classList.add('selected');
-  user.avatar = el.src;
-}
-
 async function doLogin(){
-  const n = $("loginName").value.trim();
-  if(!n) return alert("Ampidiro ny anaranao!");
-  user.name = n;
-  user.avatar = document.querySelector('.avatar-choice.selected').src;
-
-  // Rehefa miditra voalohany dia save-na
-  await db.collection("users").doc(user.name).set({
-    name:user.name, avatar:user.avatar, online:true, lastSeen: Date.now()
-  },{merge:true});
-
-  localStorage.lgbtUser = JSON.stringify(user);
-  $("login").style.display="none";
-  $("main").style.display="flex";
-  loadUsers();
-}
-
-function loadUsers(){
-  db.collection("users").onSnapshot(s=>{
-    $("userList").innerHTML="";
-    if(s.empty) {
-        $("userList").innerHTML = "<p style='text-align:center; opacity:0.5; margin-top:50px'>Mbola tsy misy olona hafa...</p>";
-    }
-    s.forEach(d=>{
-      if(d.id !== user.name){
-        const u = d.data();
-        $("userList").innerHTML += `
-          <div class="item" onclick="openChat('${u.name}')">
-            <img src="${u.avatar}">
-            <div><b>${u.name}</b><br><small style="opacity:0.6">${u.online?'Online izao':'Offline'}</small></div>
-          </div>`;
-      }
-    });
-  });
-}
-
-function openChat(otherName){
-  activeChatId = [user.name, otherName].sort().join("_");
-  $("activeChatName").innerText = otherName;
-  show('chat');
-
-  if(unsubMsg) unsubMsg();
-  unsubMsg = db.collection("private_chats").doc(activeChatId).collection("messages").orderBy("ts")
-    .onSnapshot(s => {
-      $("messages").innerHTML = "";
-      s.forEach(d => {
-        const m = d.data();
-        const isMe = m.sender === user.name;
-        const ora = new Date(m.ts).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
-        if(!isMe && m.status === 'sent') d.ref.update({status:'seen'});
-
-        $("messages").innerHTML += `
-          <div class="msg-wrapper ${isMe?'me':'other'}" onclick="deleteMsg('${d.id}', ${isMe})">
-            <div class="msg">${m.text || `<img src="${m.img}" style="max-width:200px; border-radius:12px">`}</div>
-            <div class="time">${ora} ${isMe ? `<span class="seen-status">${m.status==='seen'?'✔✔':'✔'}</span>` : ''}</div>
-          </div>`;
-      });
-      $("messages").scrollTop = $("messages").scrollHeight;
-    });
-
-  if(unsubTyping) unsubTyping();
-  unsubTyping = db.collection("private_chats").doc(activeChatId).onSnapshot(d => {
-    if(d.exists()){
-      const data = d.data();
-      $("typingStatus").innerText = data[`typing_${otherName}`] ? otherName + " manoratra..." : "";
-    }
-  });
-}
-
-function sendTyping(){
-  const isTyping = $("msgInput").value.trim().length > 0;
-  db.collection("private_chats").doc(activeChatId).set({
-    [`typing_${user.name}`]: isTyping
-  }, {merge:true});
-}
-
-function sendMsg(){
-  const val = $("msgInput").value.trim();
-  if(!val) return;
-  db.collection("private_chats").doc(activeChatId).collection("messages").add({
-    sender: user.name, text: val, ts: Date.now(), status: 'sent'
-  });
-  $("msgInput").value = "";
-  db.collection("private_chats").doc(activeChatId).set({ [`typing_${user.name}`]: false }, {merge:true});
-}
-
-async function uploadPhoto(i){
-  const f = i.files[0];
-  if(!f) return;
-  const r = st.ref("private/"+Date.now()+f.name);
-  await r.put(f);
-  const url = await r.getDownloadURL();
-  db.collection("private_chats").doc(activeChatId).collection("messages").add({
-    sender: user.name, img: url, ts: Date.now(), status: 'sent'
-  });
-}
-
-function deleteMsg(id, isMe) {
-    if(isMe && confirm("Hamafa ity hafatra ity?")) {
-        db.collection("private_chats").doc(activeChatId).collection("messages").doc(id).delete();
-    }
-}
-
-function closeChat(){
-  if(activeChatId) db.collection("private_chats").doc(activeChatId).set({ [`typing_${user.name}`]: false }, {merge:true});
-  show('rooms');
-}
-
-function toggleTheme(){ document.body.classList.toggle('light-mode'); }
-
-function show(id){
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-  $(id).classList.add('active-screen');
-  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-  if($('nav-'+id)) $('nav-'+id).classList.add('active');
-  if(id === 'settings'){
-    $("myProfPic").src = user.avatar;
-    $("myProfName").innerText = user.name;
-  }
-}
-
-function logout(){
-  if(user.name) db.collection("users").doc(user.name).update({online:false});
-  localStorage.clear();
-  location.reload();
-}
-
-window.onload=()=>{
-  if(localStorage.lgbtUser){
-    user = JSON.parse(localStorage.lgbtUser);
+    const n = $("loginName").value.trim();
+    if(!n) return;
+    user.name = n;
+    localStorage.chatUser = n;
+    await db.collection("users").doc(n).set({name:n, online:true, last: Date.now()},{merge:true});
     $("login").style.display="none";
     $("main").style.display="flex";
     loadUsers();
-    db.collection("users").doc(user.name).update({online:true});
-  }
+    listenForCalls();
+}
+
+function loadUsers(){
+    db.collection("users").onSnapshot(s => {
+        $("userList").innerHTML = "";
+        s.forEach(d => {
+            if(d.id !== user.name){
+                $("userList").innerHTML += `<div style="padding:15px; border-bottom:1px solid var(--glass); cursor:pointer" onclick="openChat('${d.id}')"><b>${d.id}</b><br><small style="opacity:0.6">${d.data().online?'Online':'Offline'}</small></div>`;
+            }
+        });
+    });
+}
+
+function openChat(other){
+    activeChatId = [user.name, other].sort().join("_");
+    $("activeChatName").innerText = other;
+    show('chat');
+
+    if(unsubMsg) unsubMsg();
+    // ORDERED BY TS ASCENDING (Mba hifanaraka tsara)
+    unsubMsg = db.collection("private_chats").doc(activeChatId).collection("messages")
+        .orderBy("ts", "asc")
+        .onSnapshot(s => {
+            $("messages").innerHTML = "";
+            s.forEach(d => {
+                const m = d.data();
+                const isMe = m.sender === user.name;
+                // Raha tsy mbola misy "ts" (Server delay), ampiasao ny ora izao
+                const dDate = m.ts ? m.ts.toDate() : new Date();
+                const ora = dDate.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
+                $("messages").innerHTML += `
+                    <div class="msg-wrapper ${isMe?'me':'other'}">
+                        <div class="msg">${m.text}</div>
+                        <div class="time-box">${ora} ${isMe ? (m.seen?'✔✔':'✔') : ''}</div>
+                    </div>`;
+                if(!isMe && !m.seen) d.ref.update({seen:true});
+            });
+            $("messages").scrollTop = $("messages").scrollHeight;
+        });
+
+    if(unsubTyping) unsubTyping();
+    unsubTyping = db.collection("private_chats").doc(activeChatId).onSnapshot(d => {
+        if(d.exists()) $("typingStatus").innerText = d.data()["typ_"+other] ? other+" manoratra..." : "";
+    });
+}
+
+function sendMsg(){
+    const txt = $("msgInput").value.trim();
+    if(!txt) return;
+    db.collection("private_chats").doc(activeChatId).collection("messages").add({
+        sender: user.name,
+        text: txt,
+        ts: firebase.firestore.FieldValue.serverTimestamp(), // ORA AVY AMIN'NY SERVER
+        seen: false
+    });
+    $("msgInput").value = "";
+    db.collection("private_chats").doc(activeChatId).set({["typ_"+user.name]:false},{merge:true});
+}
+
+function sendTyping(){
+    db.collection("private_chats").doc(activeChatId).set({
+        ["typ_"+user.name]: $("msgInput").value.length > 0
+    },{merge:true});
+}
+
+/* --- SYSTEME APPEL --- */
+function startCall(){
+    const other = $("activeChatName").innerText;
+    $("callUserName").innerText = other;
+    $("callUserImg").src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${other}`;
+    $("callOverlay").style.display = "flex";
+    
+    db.collection("calls").doc(other).set({
+        caller: user.name,
+        status: "ringing",
+        ts: Date.now()
+    });
+}
+
+function listenForCalls(){
+    db.collection("calls").doc(user.name).onSnapshot(d => {
+        if(d.exists() && d.data().status === "ringing"){
+            const caller = d.data().caller;
+            if(confirm("Miantso i " + caller + ". Handray ve ianao?")){
+                alert("Mifandray ny feo...");
+                db.collection("calls").doc(user.name).delete();
+            } else {
+                endCall();
+            }
+        }
+    });
+}
+
+function endCall(){
+    $("callOverlay").style.display = "none";
+    db.collection("calls").doc(user.name).delete();
+}
+
+function show(id){
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+    $(id).classList.add('active-screen');
+}
+function closeChat(){ show('rooms'); }
+function logout(){ localStorage.clear(); location.reload(); }
+
+window.onload = () => {
+    if(localStorage.chatUser) {
+        $("loginName").value = localStorage.chatUser;
+        doLogin();
+    }
 }
 </script>
 </body>
