@@ -40,11 +40,14 @@ header { padding: 15px; display: flex; align-items: center; justify-content: spa
 .me { align-self: flex-end; }
 .other { align-self: flex-start; }
 
-.msg { padding: 12px 16px; border-radius: 20px; font-size: .95rem; line-height: 1.4; }
+.msg { padding: 12px 16px; border-radius: 20px; font-size: .95rem; line-height: 1.4; position: relative; }
 .me .msg { background: var(--msg-me); color: #fff; border-bottom-right-radius: 4px; }
 .other .msg { background: var(--msg-other); color: var(--text); border-bottom-left-radius: 4px; }
 
-.seen-status { font-size: .65rem; opacity: .6; margin-top: 4px; text-align: right; }
+.time { font-size: 0.6rem; opacity: 0.5; margin-top: 2px; }
+.me .time { text-align: right; }
+
+.seen-status { font-size: .65rem; opacity: .8; color: #3b82f6; font-weight: bold; }
 #typingStatus { padding: 5px 20px; font-size: .75rem; color: #3b82f6; height: 25px; font-weight: 600; font-style: italic; }
 
 .controls { display: flex; gap: 10px; padding: 12px; background: var(--glass); backdrop-filter: blur(10px); }
@@ -69,23 +72,25 @@ button { background: none; border: none; color: var(--primary); cursor: pointer;
 
 <div class="app">
   <div id="login" class="screen active-screen" style="justify-content: center; align-items: center; text-align: center; padding: 20px;">
-    <h1 style="font-size: 2.2rem; background: var(--msg-me); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">GlobalChat</h1>
-    <p style="opacity: 0.6;">By Sylvain Solofoniaina</p>
+    <div style="font-size: 3rem; margin-bottom: 10px;">🛡️</div>
+    <h1 style="font-size: 2.2rem; background: var(--msg-me); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; margin:0">GlobalChat</h1>
+    <p style="opacity: 0.6; margin-bottom: 20px;">Secure Private Messaging</p>
     
-    <div id="avatarList" style="margin: 20px 0;">
+    <div id="avatarList">
       <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Mamy" class="avatar-choice selected" onclick="selectAv(this)">
       <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sary" class="avatar-choice" onclick="selectAv(this)">
+      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Koto" class="avatar-choice" onclick="selectAv(this)">
     </div>
     
-    <input id="loginName" placeholder="Anaranao..." style="width: 85%; padding: 16px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); background: var(--glass); color: white; outline: none; text-align: center;">
+    <input id="loginName" placeholder="Anaranao..." style="width: 85%; padding: 16px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); background: var(--glass); color: white; outline: none; text-align: center; margin-top: 20px;">
     <button onclick="doLogin()" style="background: var(--msg-me); color: white; padding: 16px; border-radius: 15px; font-weight: bold; width: 85%; margin-top: 20px; border: none;">HIDITRA ➔</button>
-    <div class="copyright">© 2024 Sylvain Solofoniaina</div>
+    <div class="copyright">Developed by Sylvain Solofoniaina<br>© 2026 Pro Version</div>
   </div>
 
   <div id="main" style="display:none; flex:1; flex-direction:column">
     <div id="rooms" class="screen active-screen">
       <header><b>Hafatra 💬</b><button onclick="toggleTheme()">🌓</button></header>
-      <div id="userList"></div>
+      <div id="userList" style="flex:1; overflow-y:auto"></div>
     </div>
 
     <div id="chat" class="screen">
@@ -98,7 +103,7 @@ button { background: none; border: none; color: var(--primary); cursor: pointer;
       <div id="typingStatus"></div>
       <div class="controls">
         <button onclick="fileIn.click()">⊕</button>
-        <input id="msgInput" placeholder="Hafatra..." oninput="sendTyping()" onkeydown="if(event.key==='Enter') sendMsg()">
+        <input id="msgInput" placeholder="Manorata hafatra..." oninput="sendTyping()" onkeydown="if(event.key==='Enter') sendMsg()">
         <button onclick="sendMsg()" style="background: var(--primary); color: white; width: 40px; height: 40px; border-radius: 50%;">➤</button>
         <input type="file" id="fileIn" hidden accept="image/*" onchange="uploadPhoto(this)">
       </div>
@@ -111,9 +116,9 @@ button { background: none; border: none; color: var(--primary); cursor: pointer;
         <h2 id="myProfName" style="margin-top:15px"></h2>
         <div style="background: var(--glass); border-radius: 15px; padding: 15px; margin: 20px 0; text-align: left;">
             <p style="margin:0; font-size:0.8rem"><b>Auteur:</b> Sylvain Solofoniaina</p>
-            <p style="margin:5px 0 0; font-size:0.8rem"><b>Privacité:</b> Encrypted Private Chat</p>
+            <p style="margin:5px 0 0; font-size:0.8rem"><b>Statut:</b> Voaaro (Encrypted)</p>
         </div>
-        <button onclick="logout()" style="background:#ef4444; color:white; padding:15px; border-radius:15px; width:100%; border:none; font-weight:bold;">LOGOUT</button>
+        <button onclick="logout()" style="background:#ef4444; color:white; padding:15px; border-radius:15px; width:100%; border:none; font-weight:bold;">HIALA (LOGOUT)</button>
       </div>
     </div>
 
@@ -129,17 +134,20 @@ button { background: none; border: none; color: var(--primary); cursor: pointer;
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
 <script>
-firebase.initializeApp({
+// AMPIFIDIRO ETO NY CONFIG FIREBASE-NAO
+const firebaseConfig = {
   apiKey: "AIzaSyAJAy-RPWZiqrngfpOVBxsq9FSvms5hFGI",
   authDomain: "lgbtq-pro.firebaseapp.com",
   projectId: "lgbtq-pro",
   storageBucket: "lgbtq-pro.firebasestorage.app",
   messagingSenderId: "188046971429",
   appId: "1:188046971429:web:b99215b46097c8ac8a65cc"
-});
+};
 
+firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const st = firebase.storage();
+
 let user = {name:"", avatar:""};
 let activeChatId = "";
 let unsubMsg = null;
@@ -159,8 +167,9 @@ async function doLogin(){
   user.name = n;
   user.avatar = document.querySelector('.avatar-choice.selected').src;
 
+  // Rehefa miditra voalohany dia save-na
   await db.collection("users").doc(user.name).set({
-    name:user.name, avatar:user.avatar, online:true
+    name:user.name, avatar:user.avatar, online:true, lastSeen: Date.now()
   },{merge:true});
 
   localStorage.lgbtUser = JSON.stringify(user);
@@ -172,13 +181,16 @@ async function doLogin(){
 function loadUsers(){
   db.collection("users").onSnapshot(s=>{
     $("userList").innerHTML="";
+    if(s.empty) {
+        $("userList").innerHTML = "<p style='text-align:center; opacity:0.5; margin-top:50px'>Mbola tsy misy olona hafa...</p>";
+    }
     s.forEach(d=>{
       if(d.id !== user.name){
         const u = d.data();
         $("userList").innerHTML += `
           <div class="item" onclick="openChat('${u.name}')">
             <img src="${u.avatar}">
-            <div><b>${u.name}</b><br><small style="opacity:0.6">${u.online?'Online':'Offline'}</small></div>
+            <div><b>${u.name}</b><br><small style="opacity:0.6">${u.online?'Online izao':'Offline'}</small></div>
           </div>`;
       }
     });
@@ -186,12 +198,10 @@ function loadUsers(){
 }
 
 function openChat(otherName){
-  // FAMARITANA NY ID MANOKANA HO AN'NY OLONA ROA (Private Room ID)
   activeChatId = [user.name, otherName].sort().join("_");
   $("activeChatName").innerText = otherName;
   show('chat');
 
-  // Mihaino ny hafatra ao amin'ny ROOM manokana ihany
   if(unsubMsg) unsubMsg();
   unsubMsg = db.collection("private_chats").doc(activeChatId).collection("messages").orderBy("ts")
     .onSnapshot(s => {
@@ -199,12 +209,14 @@ function openChat(otherName){
       s.forEach(d => {
         const m = d.data();
         const isMe = m.sender === user.name;
+        const ora = new Date(m.ts).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
         if(!isMe && m.status === 'sent') d.ref.update({status:'seen'});
 
         $("messages").innerHTML += `
           <div class="msg-wrapper ${isMe?'me':'other'}" onclick="deleteMsg('${d.id}', ${isMe})">
             <div class="msg">${m.text || `<img src="${m.img}" style="max-width:200px; border-radius:12px">`}</div>
-            <div class="seen-status">${isMe ? (m.status === 'seen' ? '✔✔ Vue' : '✔') : ''}</div>
+            <div class="time">${ora} ${isMe ? `<span class="seen-status">${m.status==='seen'?'✔✔':'✔'}</span>` : ''}</div>
           </div>`;
       });
       $("messages").scrollTop = $("messages").scrollHeight;
